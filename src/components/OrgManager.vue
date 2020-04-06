@@ -4,7 +4,7 @@
       :data="orgTableData"
       style="width: 100%;margin-bottom: 20px;"
       row-key="orgUid"
-      header-cell-style="text-align: center; background:#ddd;"
+      :header-cell-style="{'text-align':'center', background:'#ddd'}"
       highlight-current-row
       border
       :expand-row-keys="expandRowKeys"
@@ -66,13 +66,15 @@
           </el-col>
         </el-row>
         <el-form-item label="上级组织">
-          <el-autocomplete
-            clearable
-            v-model="form.orgParName"
-            :fetch-suggestions="querySearch"
-            placeholder="请输入内容"
-            @select="handleSelect"
-          ></el-autocomplete>
+          <el-select v-model="form.orgParUid" clearable filterable placeholder="请选择">
+            <el-option
+              v-for="org in orgList"
+              :key="org.orgUid"
+              :label="org.orgName"
+              :value="org.orgUid"
+              @change="selectClick">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-row>
           <el-col :span="12">
@@ -129,6 +131,7 @@ export default {
   },
   created() {
     this.getOrgTableData()
+    this.getOrgList()
   },
   methods: {
     // 请求组织表格数据
@@ -143,13 +146,7 @@ export default {
     // 请求表单中上级组织的备选数据
     async getOrgList() {
       const { data: res } = await this.$http.get('/org/getAll')
-      // 先清空数组,数组中必须用value关键字属性作为备选数据的名称
-      this.orgList.splice(0)
-      for (let i = 0; i < res.length; i++) {
-        this.orgList.push(
-          { value: res[i].orgName, orgId: res[i].orgId, orgUid: res[i].orgUid }
-        )
-      }
+      this.orgList = res
     },
     // 表头添加按钮函数
     handleInsertRoot() {
@@ -158,25 +155,31 @@ export default {
         this.form[key] = ''
       }
       this.dialogFormVisible = true
-      console.log(this.form)
     },
     // 添加按钮函数
     handleInsert(index, row) {
-      this.dialogFormVisible = true
       // 初始化表单数据
       for (const key in this.form) {
         this.form[key] = ''
       }
       this.form.orgParUid = row.orgUid
       this.form.orgParName = row.orgName
-      console.log(index, row)
+      this.dialogFormVisible = true
     },
     // 编辑按钮函数
     handleEdit(index, row) {
-      this.dialogFormVisible = true
       // 初始化表单数据
-      this.form = row
-      console.log(index, row)
+      this.form.orgUid = row.orgUid
+      this.form.orgId = row.orgId
+      this.form.orgName = row.orgName
+      this.form.orgParUid = row.orgParUid
+      this.form.orgParName = row.orgParName
+      this.form.orgManager = row.orgManager
+      this.form.orgPhone = row.orgPhone
+      this.form.orgEmail = row.orgEmail
+      this.form.orgDescription = row.orgDescription
+      this.dialogFormVisible = true
+      console.log(row)
     },
     // 删除按钮函数
     handleDelete(index, row) {
@@ -187,7 +190,6 @@ export default {
         this.getOrgTableData()
         this.$message.success('删除成功！')
       })
-      console.log(index, row)
     },
     // 表单提交按钮函数
     onSubmit() {
@@ -201,36 +203,20 @@ export default {
         this.dialogFormVisible = false
       })
     },
-    // 表单中上级组织带提示的输入方法,搜索和过滤
-    querySearch(queryString, cb) {
-      const orgList = this.orgList
-      const results = queryString ? orgList.filter(this.createFilter(queryString)) : orgList
-      // 调用 callback 返回建议列表的数据
-      cb(results)
-    },
-    createFilter(queryString) {
-      return (orgList) => {
-        return (orgList.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0)
-      }
-    },
-    // 初始化组件数据，在mounted()中被调用
-    loadAll() {
-      // 初始化orgTempList，用作选择上级组织时的备选列表,
-      this.getOrgList()
-    },
-    // 选中上级组织备选列中的一个item
-    handleSelect(item) {
-      console.log(item)
+    // 选中上级组织备选列中的一个org
+    selectClick(org) {
+      this.form.orgParUid = org.orgUid
+      this.form.orgParName = org.orgName
     }
-  },
-  mounted() {
-    this.loadAll()
   }
 }
 </script>
 
 <style lang="less" scoped>
   .el-autocomplete {
+    width: 100%;
+  }
+  .el-select {
     width: 100%;
   }
 </style>

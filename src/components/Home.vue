@@ -4,7 +4,7 @@
     <el-header style="height: 80px;">
       <div>
         <img src="../assets/images/buaalogoheader.png">
-        |&nbsp;欢迎使用流程优化系统
+        <span>| 欢迎使用项目管理系统</span>
         <img class="headertopbg" src="../assets/images/headertopbg.png">
       </div>
     </el-header>
@@ -13,45 +13,45 @@
 <!--      左侧菜单-->
       <el-aside style="width: 308px;">
         <el-menu
-          default-active="/projmanager"
+          :default-active="$route.path"
           class="el-menu-vertical-demo"
           background-color="#D6E8F7"
           router
           unique-opened>
-          <el-menu-item index="/projmanager">
+          <el-menu-item index="/projManager">
             <i class="el-icon-menu"></i>
             <span slot="title">项目管理</span>
           </el-menu-item>
           <el-submenu index="2">
             <template slot="title">
               <i class="el-icon-edit-outline"></i>
-              <span>流程管理</span>
+              <span>项目流程</span>
             </template>
-              <el-menu-item index="/procmanager">
+              <el-menu-item index="/procManager">
                 <i class="el-icon-collection-tag"></i>
                 <span slot="title">流程管理</span>
               </el-menu-item>
-            <el-menu-item index="/procdev">
+            <el-menu-item index="/procDev">
               <i class="el-icon-collection-tag"></i>
               <span slot="title">流程编制</span>
             </el-menu-item>
           </el-submenu>
-          <el-menu-item index="/projopt">
+          <el-menu-item index="/projOpt">
             <i class="el-icon-s-marketing"></i>
-            <span slot="title">流程优化</span>
+            <span slot="title">项目优化</span>
           </el-menu-item>
           <el-submenu index="4">
             <template slot="title">
               <i class="el-icon-s-data"></i>
               <span>流程仿真</span>
             </template>
-            <el-menu-item index="procsimmode1">
+            <el-menu-item index="/procSimMode1">
               <i class="el-icon-collection-tag"></i>
-              <span slot="title">固定流程</span>
+              <span slot="title">已固定流程</span>
             </el-menu-item>
-            <el-menu-item index="procsimmode2">
+            <el-menu-item index="/procSimMode2">
               <i class="el-icon-collection-tag"></i>
-              <span slot="title">不定流程</span>
+              <span slot="title">自定义流程</span>
             </el-menu-item>
           </el-submenu>
           <el-submenu index="5">
@@ -59,20 +59,20 @@
               <i class="el-icon-setting"></i>
               <span>资源管理</span>
             </template>
-            <el-menu-item index="/humanmanager">
+            <el-menu-item index="/humanManager">
               <i class="el-icon-collection-tag"></i>
               <span slot="title">人力资源</span>
             </el-menu-item>
-            <el-menu-item index="/equmanager">
+            <el-menu-item index="/equipManager">
               <i class="el-icon-collection-tag"></i>
               <span slot="title">设备资源</span>
             </el-menu-item>
-            <el-menu-item index="/placemanager">
+            <el-menu-item index="/placeManager">
               <i class="el-icon-collection-tag"></i>
               <span slot="title">场地资源</span>
             </el-menu-item>
           </el-submenu>
-          <el-menu-item index="/orgmanager">
+          <el-menu-item index="/orgManager">
             <i class="el-icon-office-building"></i>
             <span slot="title">组织管理</span>
           </el-menu-item>
@@ -106,8 +106,9 @@ export default {}
       display: flex;
       align-items: center;
       margin-left: 10px;
-      .headertopbg {
-        margin-left: 1000px;
+      > .headertopbg {
+        position: absolute;
+        left: 70%;
       }
     }
   }

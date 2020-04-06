@@ -10,7 +10,7 @@ import ProcDev from '../components/ProcDev'
 import ProcSimMode1 from '../components/ProcSimMode1'
 import ProcSimMode2 from '../components/ProcSimMode2'
 import HumanManager from '../components/HumanManager'
-import EquManager from '../components/EquManager'
+import EquipManager from '../components/EquipManager'
 import PlaceManager from '../components/PlaceManager'
 
 Vue.use(VueRouter)
@@ -21,18 +21,18 @@ const routes = [
   {
     path: '/home',
     component: Home,
-    redirect: '/projmanager',
+    redirect: '/projManager',
     children: [
-      { path: '/projmanager', component: ProjManager },
-      { path: '/orgmanager', component: OrgManager },
-      { path: '/projopt', component: ProjOpt },
-      { path: '/procmanager', component: ProcManager },
-      { path: '/procdev', component: ProcDev },
-      { path: '/procsimmode1', component: ProcSimMode1 },
-      { path: '/procsimmode2', component: ProcSimMode2 },
-      { path: '/humanmanager', component: HumanManager },
-      { path: '/equmanager', component: EquManager },
-      { path: '/placemanager', component: PlaceManager }
+      { path: '/projManager', component: ProjManager },
+      { path: '/orgManager', component: OrgManager },
+      { path: '/projOpt', component: ProjOpt },
+      { path: '/procManager', component: ProcManager },
+      { path: '/procDev', component: ProcDev },
+      { path: '/procSimMode1', component: ProcSimMode1 },
+      { path: '/procSimMode2', component: ProcSimMode2 },
+      { path: '/humanManager', component: HumanManager },
+      { path: '/equipManager', component: EquipManager },
+      { path: '/placeManager', component: PlaceManager }
     ]
   }
 ]
