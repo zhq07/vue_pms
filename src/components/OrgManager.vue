@@ -14,7 +14,7 @@
       <el-table-column prop="orgPhone" label="联系电话" width="180"></el-table-column>
       <el-table-column prop="orgEmail" label="电子邮箱" width="220"></el-table-column>
       <el-table-column prop="orgAddress" label="地址" width="300"></el-table-column>
-      <el-table-column label="操作" width="200" align="center">
+      <el-table-column label="操作" align="center" width="200">
         <template slot="header">
           <div style="background-color: #ddd; color: #909399;" @click="handleInsertRoot()">
             添加组织
@@ -66,13 +66,12 @@
           </el-col>
         </el-row>
         <el-form-item label="上级组织">
-          <el-select v-model="form.orgParUid" clearable filterable placeholder="请选择">
+          <el-select v-model="form.orgParName" @change="selectClick" clearable @clear="selectClear" filterable placeholder="请选择">
             <el-option
               v-for="org in orgList"
               :key="org.orgUid"
               :label="org.orgName"
-              :value="org.orgUid"
-              @change="selectClick">
+              :value="org">
             </el-option>
           </el-select>
         </el-form-item>
@@ -179,7 +178,6 @@ export default {
       this.form.orgEmail = row.orgEmail
       this.form.orgDescription = row.orgDescription
       this.dialogFormVisible = true
-      console.log(row)
     },
     // 删除按钮函数
     handleDelete(index, row) {
@@ -207,15 +205,17 @@ export default {
     selectClick(org) {
       this.form.orgParUid = org.orgUid
       this.form.orgParName = org.orgName
+    },
+    // 清空上级组织
+    selectClear() {
+      this.form.orgParUid = ''
+      this.form.orgParName = ''
     }
   }
 }
 </script>
 
 <style lang="less" scoped>
-  .el-autocomplete {
-    width: 100%;
-  }
   .el-select {
     width: 100%;
   }

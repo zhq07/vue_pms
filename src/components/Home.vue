@@ -4,14 +4,14 @@
     <el-header style="height: 80px;">
       <div>
         <img src="../assets/images/buaalogoheader.png">
-        <span>| 欢迎使用项目管理系统</span>
+        <span>| 研发设计流程建模与优化原型系统</span>
         <img class="headertopbg" src="../assets/images/headertopbg.png">
       </div>
     </el-header>
 <!--    页面主体区域-->
     <el-container class="home-container">
 <!--      左侧菜单-->
-      <el-aside style="width: 308px;">
+      <el-aside style="width: 306px;">
         <el-menu
           :default-active="$route.path"
           class="el-menu-vertical-demo"

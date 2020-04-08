@@ -10,16 +10,18 @@
       :expand-row-keys="expandRowKeys"
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
       <el-table-column prop="projId" label="编号" sortable width="120"></el-table-column>
-      <el-table-column prop="projName" label="名称" width="220"></el-table-column>
-      <el-table-column prop="projOrg" label="所属组织" width="220"></el-table-column>
-      <el-table-column prop="projPlanStartDate" label="计划开始日期" width="130"></el-table-column>
-      <el-table-column prop="projPlanFinishDate" label="计划结束日期" width="130"></el-table-column>
-      <el-table-column prop="projPlanDur" label="计划工期/天" width="130"></el-table-column>
-      <el-table-column prop="projActStartDate" label="实际开始日期" width="130"></el-table-column>
-      <el-table-column prop="projActFinishDate" label="实际结束日期" width="130"></el-table-column>
-      <el-table-column prop="projActsDur" label="实际工期/天" width="130"></el-table-column>
-      <el-table-column prop="projPctWork" label="完成比例" width="130"></el-table-column>
-      <el-table-column prop="projStatus" label="状态" width="130"></el-table-column>
+      <el-table-column prop="projName" label="名称" width="200"></el-table-column>
+      <el-table-column prop="projOrgName" label="所属组织" width="200"></el-table-column>
+<!--      <el-table-column prop="projManager" label="负责人" align="center" width="100"></el-table-column>-->
+      <el-table-column prop="projPlanStartDate" label="计划开始" align="center" width="100"></el-table-column>
+      <el-table-column prop="projPlanFinishDate" label="计划结束" align="center" width="100"></el-table-column>
+      <el-table-column prop="projPlanDur" label="计划工期" align="center" width="105"></el-table-column>
+      <el-table-column prop="projEarlyStartDate" label="最早开始" align="center" width="100"></el-table-column>
+      <el-table-column prop="projLateFinishDate" label="最晚结束" align="center" width="100"></el-table-column>
+      <el-table-column prop="projActStartDate" label="实际开始" align="center" width="100"></el-table-column>
+      <el-table-column prop="projActFinishDate" label="实际结束" align="center" width="100"></el-table-column>
+      <el-table-column prop="projPctWork" label="完成比例" align="center" width="100"></el-table-column>
+      <el-table-column prop="projState" label="状态" :formatter="stateFormat" align="center" width="100"></el-table-column>
       <el-table-column label="操作" align="center">
         <template slot="header">
           <div style="background-color: #ddd; color: #909399;" @click="handleInsertRoot()">
@@ -49,7 +51,7 @@
       </el-table-column>
     </el-table>
     <!--    弹出表单-->
-    <el-dialog width="30%" title="请正确填写表单" :visible.sync="dialogFormVisible">
+    <el-dialog width="720px" title="请正确填写表单" :visible.sync="dialogFormVisible">
       <el-form ref="form" :model="form" label-width="80px">
         <el-row>
           <el-col :span="12">
@@ -71,7 +73,14 @@
           <el-col :span="12">
             <div class="grid-content bg-purple">
               <el-form-item label="所属组织">
-                <el-input clearable v-model="form.projOrgName"></el-input>
+                <el-select v-model="form.projOrgName" clearable filterable @change="selectProjOrgClick" @clear="selectProjOrgClear" placeholder="请选择">
+                  <el-option
+                    v-for="org in orgList"
+                    :key="org.orgUid"
+                    :label="org.orgName"
+                    :value="org">
+                  </el-option>
+                </el-select>
               </el-form-item>
             </div>
           </el-col>
@@ -87,14 +96,28 @@
           <el-col :span="12">
             <div class="grid-content bg-purple">
               <el-form-item label="上级项目">
-                <el-input clearable v-model="form.projParName"></el-input>
+                <el-select v-model="form.projParName" clearable filterable @change="selectProjParClick" @clear="selectProjParClear" placeholder="请选择">
+                  <el-option
+                    v-for="proj in projList"
+                    :key="proj.projUid"
+                    :label="proj.projName"
+                    :value="proj">
+                  </el-option>
+                </el-select>
               </el-form-item>
             </div>
           </el-col>
           <el-col :span="12">
             <div class="grid-content bg-purple-light">
               <el-form-item label="对应任务">
-                <el-input clearable v-model="form.projTaskName"></el-input>
+                <el-select v-model="form.projTaskName" clearable filterable @change="selectProjTaskClick" @clear="selectProjTaskClear" placeholder="请选择">
+                  <el-option
+                    v-for="task in taskList"
+                    :key="task.taskUid"
+                    :label="task.taskName"
+                    :value="task">
+                  </el-option>
+                </el-select>
               </el-form-item>
             </div>
           </el-col>
@@ -103,14 +126,24 @@
           <el-col :span="12">
             <div class="grid-content bg-purple">
               <el-form-item label="计划开始">
-                <el-input clearable v-model="form.projPlanStartDate"></el-input>
+                <el-date-picker
+                  v-model="form.projPlanStartDate"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="选择日期">
+                </el-date-picker>
               </el-form-item>
             </div>
           </el-col>
           <el-col :span="12">
             <div class="grid-content bg-purple-light">
               <el-form-item label="计划结束">
-                <el-input clearable v-model="form.projPlanFinishDate"></el-input>
+                <el-date-picker
+                  v-model="form.projPlanFinishDate"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="选择日期">
+                </el-date-picker>
               </el-form-item>
             </div>
           </el-col>
@@ -119,14 +152,73 @@
           <el-col :span="12">
             <div class="grid-content bg-purple">
               <el-form-item label="最早开始">
-                <el-input clearable v-model="form.projEarlyStartDate"></el-input>
+                <el-date-picker
+                  v-model="form.projEarlyStartDate"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="选择日期">
+                </el-date-picker>
               </el-form-item>
             </div>
           </el-col>
           <el-col :span="12">
             <div class="grid-content bg-purple-light">
               <el-form-item label="最晚结束">
-                <el-input clearable v-model="form.projLateFinishDate"></el-input>
+                <el-date-picker
+                  v-model="form.projLateFinishDate"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="选择日期">
+                </el-date-picker>
+              </el-form-item>
+            </div>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <div class="grid-content bg-purple">
+              <el-form-item label="实际开始">
+                <el-date-picker
+                  v-model="form.projActStartDate"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="选择日期">
+                </el-date-picker>
+              </el-form-item>
+            </div>
+          </el-col>
+          <el-col :span="12">
+            <div class="grid-content bg-purple-light">
+              <el-form-item label="实际结束">
+                <el-date-picker
+                  v-model="form.projActFinishDate"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="选择日期">
+                </el-date-picker>
+              </el-form-item>
+            </div>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <div class="grid-content bg-purple">
+              <el-form-item label="完成比例">
+                <el-input clearable v-model="form.projPctWork"></el-input>
+              </el-form-item>
+            </div>
+          </el-col>
+          <el-col :span="12">
+            <div class="grid-content bg-purple-light">
+              <el-form-item label="当前状态">
+                <el-select v-model="projStateLabel" clearable filterable @change="selectProjStateClick" @clear="selectProjStateClear" placeholder="请选择">
+                  <el-option
+                    v-for="state in projStateOptions"
+                    :key="state.value"
+                    :label="state.label"
+                    :value="state">
+                  </el-option>
+                </el-select>
               </el-form-item>
             </div>
           </el-col>
@@ -147,9 +239,6 @@
 export default {
   data() {
     return {
-      projTableData: [],
-      expandRowKeys: [],
-      dialogFormVisible: false,
       form: {
         projUid: '',
         projId: '',
@@ -163,20 +252,63 @@ export default {
         projTaskName: '',
         projPlanStartDate: '',
         projPlanFinishDate: '',
-        projPlanDur: '',
         projEarlyStartDate: '',
         projLateFinishDate: '',
+        projActStartDate: '',
+        projActFinishDate: '',
+        projPctWork: '',
+        projState: '',
         projDescription: ''
       },
-      orgList: [],
+      projStateLabel: '',
+      projStateOptions: [{
+        value: 0,
+        label: '编制中'
+      }, {
+        value: 1,
+        label: '已发布'
+      }, {
+        value: 2,
+        label: '进行中'
+      }, {
+        value: 3,
+        label: '逾期进行中'
+      }, {
+        value: 4,
+        label: '已完成'
+      }],
+      expandRowKeys: [],
+      dialogFormVisible: false,
+      projTableData: [],
       projList: [],
-      taskList: []
+      taskList: [],
+      orgList: []
     }
   },
   created() {
     this.getProjTableData()
   },
   methods: {
+    // 格式化状态列
+    stateFormat(row, column, cellValue) {
+      switch (cellValue) {
+        case 0: return '编制中'
+        case 1: return '已发布'
+        case 2: return '进行中'
+        case 3: return '逾期进行中'
+        case 4: return '已完成'
+      }
+    },
+    // 根据数字得到状态
+    getStateLabelFromStateValue() {
+      switch (this.form.projState) {
+        case 0: return '编制中'
+        case 1: return '已发布'
+        case 2: return '进行中'
+        case 3: return '逾期进行中'
+        case 4: return '已完成'
+      }
+    },
     // 请求项目表格数据
     async getProjTableData() {
       const { data: res } = await this.$http.get('/proj/getProjTableData')
@@ -185,18 +317,21 @@ export default {
       for (let i = 0; i < res.length; i++) {
         this.expandRowKeys.push(res[i].projUid)
       }
-      console.log(res)
+    },
+    // 请求项目列表数据
+    async getProjList() {
+      const { data: res } = await this.$http.get('/proj/getPublished')
+      this.projList = res
+    },
+    // 请求项目包含的任务列表数据
+    async getTaskList() {
+      const { data: res } = await this.$http.get('/task/getByProjUid/' + this.form.projParUid)
+      this.taskList = res
     },
     // 请求表单中所属组织的备选数据
     async getOrgList() {
       const { data: res } = await this.$http.get('/org/getAll')
-      // 先清空数组,对象中必须用value关键字属性作为备选数据的名称
-      this.projList.splice(0)
-      for (let i = 0; i < res.length; i++) {
-        this.projList.push(
-          { value: res[i].projName, projUid: res[i].projUid }
-        )
-      }
+      this.orgList = res
     },
     // 表头添加按钮函数
     handleInsertRoot() {
@@ -204,8 +339,12 @@ export default {
       for (const key in this.form) {
         this.form[key] = ''
       }
+      // 清空对应任务列表
+      this.taskList = []
+      // 项目状态默认0-"编制中"
+      this.form.projState = 0
+      this.projStateLabel = this.getStateLabelFromStateValue()
       this.dialogFormVisible = true
-      console.log(this.form)
     },
     // 添加按钮函数
     handleInsert(index, row) {
@@ -216,68 +355,118 @@ export default {
       }
       this.form.projParUid = row.projUid
       this.form.projParName = row.projName
-      console.log(index, row)
+      // 项目状态默认0-"编制中"
+      this.form.projState = 0
+      this.projStateLabel = this.getStateLabelFromStateValue()
+      // 初始化对应任务列表
+      this.getTaskList()
     },
     // 编辑按钮函数
     handleEdit(index, row) {
-      this.dialogFormVisible = true
       // 初始化表单数据
-      this.form = row
-      console.log(index, row)
+      this.form.projUid = row.projUid
+      this.form.projId = row.projId
+      this.form.projName = row.projName
+      this.form.projOrgUid = row.projOrgUid
+      this.form.projOrgName = row.projOrgName
+      this.form.projManager = row.projManager
+      this.form.projParUid = row.projParUid
+      this.form.projParName = row.projParName
+      this.form.projTaskUid = row.projTaskUid
+      this.form.projTaskName = row.projTaskName
+      this.form.projPlanStartDate = row.projPlanStartDate
+      this.form.projPlanFinishDate = row.projPlanFinishDate
+      this.form.projPlanDur = row.projPlanDur
+      this.form.projEarlyStartDate = row.projEarlyStartDate
+      this.form.projLateFinishDate = row.projLateFinishDate
+      this.form.projActStartDate = row.projActStartDate
+      this.form.projActFinishDate = row.projActFinishDate
+      this.form.projPctWork = row.projPctWork
+      this.form.projState = row.projState
+      this.projStateLabel = this.getStateLabelFromStateValue() // 表单中显示的状态
+      this.form.projDescription = row.projDescription
+
+      this.getTaskList()
+      this.dialogFormVisible = true
     },
     // 删除按钮函数
     handleDelete(index, row) {
       this.$http.delete('/proj/deleteByUid/' + row.projUid).then(() => {
-        // 刷新上级组织列表数据
-        this.getOrgList()
-        // 刷新表格数据
-        this.getOrgTableData()
+        // 刷新项目表格数据
+        this.getProjTableData()
         this.$message.success('删除成功！')
+        // 刷新项目列表数据
+        this.getProjList()
       })
-      console.log(index, row)
     },
     // 表单提交按钮函数
     onSubmit() {
       this.$http.post('/proj/saveOrUpdate', this.form).then(() => {
-        // 刷新上级组织列表数据
-        this.getOrgList()
-        // 刷新表格数据
-        this.getOrgTableData()
+        // 刷新项目表格数据
+        this.getProjTableData()
         this.$message.success('保存成功！')
         // 隐藏对话框
         this.dialogFormVisible = false
+        // 刷新项目列表数据
+        this.getProjList()
       })
     },
-    // 表单中上级组织带提示的输入方法,搜索和过滤
-    querySearch(queryString, cb) {
-      const projList = this.projList
-      const results = queryString ? projList.filter(this.createFilter(queryString)) : projList
-      // 调用 callback 返回建议列表的数据
-      cb(results)
+    // 选中所属组织备选列中的一个org
+    selectProjOrgClick(org) {
+      this.form.projOrgUid = org.orgUid
+      this.form.projOrgName = org.orgName
     },
-    createFilter(queryString) {
-      return (projList) => {
-        return (projList.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0)
-      }
+    // 清空所属组织
+    selectProjOrgClear() {
+      this.form.projOrgUid = ''
+      this.form.projOrgName = ''
     },
-    // 初始化组件数据，在mounted()中被调用
-    loadAll() {
-      // 初始化projTempList，用作选择上级组织时的备选列表,
-      this.getOrgList()
+    // 选中上级项目备选列中的一个proj
+    selectProjParClick(proj) {
+      this.form.projParUid = proj.projUid
+      this.form.projParName = proj.projName
+      // 清空对应任务
+      this.selectProjTaskClear()
+      // 更新任务列表
+      this.getTaskList()
     },
-    // 选中上级组织备选列中的一个item
-    handleSelect(item) {
-      console.log(item)
+    // 清空上级项目
+    selectProjParClear() {
+      this.form.projParUid = ''
+      this.form.projParName = ''
+      // 清空对应任务
+      this.selectProjTaskClear()
+    },
+    // 选中对应任务备选列中的一个task
+    selectProjTaskClick(task) {
+      this.form.projTaskUid = task.taskUid
+      this.form.projTaskName = task.taskName
+    },
+    // 清空对应任务
+    selectProjTaskClear() {
+      this.form.projTaskUid = ''
+      this.form.projTaskName = ''
+    },
+    // 选中项目状态备选列中的一个option
+    selectProjStateClick(state) {
+      this.form.projState = state.value
+      this.projStateLabel = state.label
+    },
+    // 清空项目状态
+    selectProjStateClear() {
+      this.form.projState = ''
+      this.projStateLabel = ''
     }
   },
   mounted() {
-    this.loadAll()
+    this.getProjList()
+    this.getOrgList()
   }
 }
 </script>
 
 <style lang="less" scoped>
-  .el-autocomplete {
+  .el-select {
     width: 100%;
   }
 </style>
