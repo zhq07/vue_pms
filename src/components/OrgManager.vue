@@ -1,9 +1,10 @@
 <template>
-  <div>
+  <div style="height: 50%">
     <el-table
       :data="orgTableData"
       style="width: 100%;margin-bottom: 20px;"
       row-key="orgUid"
+      height="100%"
       :header-cell-style="{'text-align':'center', background:'#ddd'}"
       highlight-current-row
       border
@@ -44,7 +45,7 @@
       <el-table-column prop="orgDescription" label="描述"></el-table-column>
     </el-table>
 <!--    弹出表单-->
-    <el-dialog width="30%" title="请正确填写表单" :visible.sync="dialogFormVisible">
+    <el-dialog width="40%" title="请正确填写表单" :visible.sync="dialogFormVisible">
       <el-form ref="form" :model="form" label-width="80px">
         <el-form-item label="组织名称">
           <el-input clearable v-model="form.orgName"></el-input>
@@ -66,12 +67,12 @@
           </el-col>
         </el-row>
         <el-form-item label="上级组织">
-          <el-select v-model="form.orgParName" @change="selectClick" clearable @clear="selectClear" filterable placeholder="请选择">
+          <el-select v-model="form.orgParUid" filterable clearable placeholder="请选择">
             <el-option
               v-for="org in orgList"
               :key="org.orgUid"
               :label="org.orgName"
-              :value="org">
+              :value="org.orgUid">
             </el-option>
           </el-select>
         </el-form-item>
@@ -200,16 +201,6 @@ export default {
         // 隐藏对话框
         this.dialogFormVisible = false
       })
-    },
-    // 选中上级组织备选列中的一个org
-    selectClick(org) {
-      this.form.orgParUid = org.orgUid
-      this.form.orgParName = org.orgName
-    },
-    // 清空上级组织
-    selectClear() {
-      this.form.orgParUid = ''
-      this.form.orgParName = ''
     }
   }
 }
