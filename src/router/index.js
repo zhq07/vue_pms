@@ -12,6 +12,7 @@ import ProcSimMode2 from '../components/ProcSimMode2'
 import HumanManager from '../components/HumanManager'
 import EquipManager from '../components/EquipManager'
 import PlaceManager from '../components/PlaceManager'
+import KnowlManager from '../components/KnowlManager'
 
 Vue.use(VueRouter)
 
@@ -32,7 +33,8 @@ const routes = [
       { path: '/procSimMode2', component: ProcSimMode2 },
       { path: '/humanManager', component: HumanManager },
       { path: '/equipManager', component: EquipManager },
-      { path: '/placeManager', component: PlaceManager }
+      { path: '/placeManager', component: PlaceManager },
+      { path: '/knowlManager', component: KnowlManager }
     ]
   }
 ]

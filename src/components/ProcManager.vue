@@ -3,7 +3,7 @@
     <!--    侧边-->
     <el-aside width="280px">
       <el-card>
-        <span @click="getAllProcClick">查看全部流程</span>
+        <span @click="getAllProcClick" style="cursor: pointer;">查看全部流程</span>
       </el-card>
       <el-tree :expand-on-click-node="false" node-key="projUid" default-expand-all :data="projListTree" :props="ProjTreeProps" @node-click="ProjTreeNodeClick"></el-tree>
     </el-aside>
@@ -14,66 +14,58 @@
           :data="procList"
           height="100%"
           row-key="procUid"
+          :default-sort="{ prop: 'procId' }"
           :header-cell-style="{'text-align':'center', background:'#ddd'}"
           highlight-current-row
           border>
           <el-table-column prop="procId" label="流程编号" align="center" sortable width="120"></el-table-column>
-          <el-table-column prop="procName" label="流程名称" align="center" width="220"></el-table-column>
-          <el-table-column prop="procProjName" label="对应项目" align="center" width="220"></el-table-column>
-          <el-table-column prop="procPlanStartDate" label="计划开始" align="center" width="120"></el-table-column>
-          <el-table-column prop="procPlanFinishDate" label="计划结束" align="center" width="120"></el-table-column>
-          <el-table-column prop="procPlanDur" label="计划工期" align="center" width="120"></el-table-column>
+          <el-table-column prop="procName" label="流程名称" align="center" width="200"></el-table-column>
+          <el-table-column prop="procProjName" label="对应项目" align="center" width="200"></el-table-column>
+          <el-table-column prop="procPlanStartDateTime" :formatter="datetimeFormat" label="计划开始" align="center" width="160"></el-table-column>
+          <el-table-column prop="procPlanFinishDateTime" :formatter="datetimeFormat" label="计划结束" align="center" width="160"></el-table-column>
+          <el-table-column prop="procPlanDur" label="计划工期" align="center" width="100"></el-table-column>
           <el-table-column prop="procState" label="状态" :formatter="procStateFormat" align="center" width="120"></el-table-column>
-          <el-table-column label="操作" align="center" width="250">
+          <el-table-column label="操作" align="center" width="220">
             <template slot="header">
-              <div style="background-color: #ddd; color: #909399;" @click="handleInsertRoot()">
+              <div style="background-color: #ddd; color: #909399; cursor: pointer;" @click="handleInsertRoot()">
                 添加流程
               </div>
             </template>
             <template slot-scope="scope">
-              <el-button
-                type="primary" plain round
-                icon="el-icon-edit"
-                size="mini"
-                @click="handleEdit(scope.$index, scope.row)">
-              </el-button>
-              <el-button
-                type="primary" plain round
-                icon="el-icon-view"
-                size="mini"
-                @click="handleView(scope.$index, scope.row)">
-              </el-button>
-              <el-button
-                type="danger" plain round
-                icon="el-icon-delete"
-                size="mini"
-                @click="handleDelete(scope.$index, scope.row)">
-              </el-button>
-              <el-button
-                type="primary" plain round
-                icon="el-icon-document"
-                size="mini"
-                @click="handleDev(scope.$index, scope.row)">
-              </el-button>
+              <span class="el-tag el-tag--plain el-tag--info el-tag--mini" style="cursor: pointer;" @click="handleEdit(scope.$index, scope.row)">
+                修改
+              </span>
+              <span class="el-tag el-tag--plain el-tag--mini" style="cursor: pointer;" @click="handleView(scope.$index, scope.row)">
+                查看
+              </span>
+              <span class="el-tag el-tag--plain el-tag--mini" style="cursor: pointer;" @click="handleDev(scope.$index, scope.row)">
+                编制
+              </span>
+              <span class="el-tag el-tag--plain el-tag--mini" style="cursor: pointer;" @click="handlePublish(scope.$index, scope.row)">
+                发布
+              </span>
+              <span class="el-tag el-tag--plain el-tag--danger el-tag--mini" style="cursor: pointer;" @click="handleDelete(scope.$index, scope.row)">
+                删除
+              </span>
             </template>
           </el-table-column>
           <el-table-column prop="procDescription" label="详细描述"></el-table-column>
         </el-table>
         <!--    弹出表单-->
         <el-dialog width="40%" title="请正确填写表单" :visible.sync="dialogFormVisible">
-          <el-form ref="form" :model="form" label-width="80px">
+          <el-form ref="form" :model="form" :rules="rules" label-width="80px">
             <el-row>
               <el-col :span="12">
                 <div class="grid-content bg-purple">
-                  <el-form-item label="流程名称">
-                    <el-input clearable v-model="form.procName"></el-input>
+                  <el-form-item label="流程名称" prop="procName">
+                    <el-input clearable v-model="form.procName" :validate-event="false"></el-input>
                   </el-form-item>
                 </div>
               </el-col>
               <el-col :span="12">
                 <div class="grid-content bg-purple-light">
-                  <el-form-item label="流程编号">
-                    <el-input clearable v-model="form.procId"></el-input>
+                  <el-form-item label="流程编号" prop="procId">
+                    <el-input clearable v-model="form.procId" :validate-event="false"></el-input>
                   </el-form-item>
                 </div>
               </el-col>
@@ -81,8 +73,8 @@
             <el-row>
               <el-col :span="12">
                 <div class="grid-content bg-purple">
-                  <el-form-item label="对应项目">
-                    <el-select v-model="form.procProjName" @change="selectProjClick" clearable @clear="selectProjClear" filterable placeholder="请选择">
+                  <el-form-item label="对应项目" prop="procProjName">
+                    <el-select v-model="form.procProjName" :validate-event="false" @change="selectProjClick" clearable @clear="selectProjClear" filterable placeholder="请选择">
                       <el-option
                         v-for="proj in projList"
                         :key="proj.projUid"
@@ -106,9 +98,10 @@
                 <div class="grid-content bg-purple">
                   <el-form-item label="计划开始">
                     <el-date-picker
-                      v-model="form.procPlanStartDate"
-                      type="date"
-                      value-format="yyyy-MM-dd"
+                      v-model="form.procPlanStartDateTime"
+                      type="datetime"
+                      :default-time="'08:00:00'"
+                      format="yyyy-MM-dd HH:mm"
                       placeholder="选择日期">
                     </el-date-picker>
                   </el-form-item>
@@ -118,9 +111,10 @@
                 <div class="grid-content bg-purple-light">
                   <el-form-item label="计划结束">
                     <el-date-picker
-                      v-model="form.procPlanFinishDate"
-                      type="date"
-                      value-format="yyyy-MM-dd"
+                      v-model="form.procPlanFinishDateTime"
+                      type="datetime"
+                      :default-time="'08:00:00'"
+                      format="yyyy-MM-dd HH:mm"
                       placeholder="选择日期">
                     </el-date-picker>
                   </el-form-item>
@@ -131,14 +125,14 @@
               <el-col :span="12">
                 <div class="grid-content bg-purple">
                   <el-form-item label="计划工期">
-                    <el-input clearable v-model="form.procPlanDur" placeholder="已有计划时间时无效"></el-input>
+                    <el-input clearable v-model="form.procPlanDur" placeholder="计划工期"></el-input>
                   </el-form-item>
                 </div>
               </el-col>
               <el-col :span="12">
                 <div class="grid-content bg-purple-light">
-                  <el-form-item label="当前状态">
-                    <el-select v-model="form.procState" clearable filterable placeholder="请选择">
+                  <el-form-item label="当前状态" prop="procState">
+                    <el-select v-model="form.procState" clearable filterable placeholder="请选择" :validate-event="false">
                       <el-option
                         v-for="state in procStateOptions"
                         :key="state.value"
@@ -164,17 +158,18 @@
       <div style="width: 100%; height: 10px; background-color: #ded"></div>
       <!--      下半部分-->
       <el-main class="down-main">
+        <div class="el-table-up-head" style="width: 100%;"><span>{{ this.currProc.procName }}</span></div>
         <el-table
           :data="taskList"
-          height="100%"
+          height="93%"
           row-key="taskUid"
           :header-cell-style="{'text-align':'center', background:'#ddd'}"
           highlight-current-row
           border>
-          <el-table-column prop="pmsTask.taskId" label="任务编号" align="center" sortable width="120"></el-table-column>
+          <el-table-column prop="pmsTask.taskId" label="编号" align="center" sortable width="90"></el-table-column>
           <el-table-column prop="pmsTask.taskName" label="任务名称" align="center" width="220"></el-table-column>
-          <el-table-column prop="pmsTask.taskPlanStartDate" label="计划开始" align="center"></el-table-column>
-          <el-table-column prop="pmsTask.taskPlanFinishDate" label="计划结束" align="center"></el-table-column>
+          <el-table-column prop="pmsTask.taskPlanStartDateTime" :formatter="datetimeFormat" label="计划开始" align="center"></el-table-column>
+          <el-table-column prop="pmsTask.taskPlanFinishDateTime" :formatter="datetimeFormat" label="计划结束" align="center"></el-table-column>
           <el-table-column prop="pmsTask.taskPlanDur" label="计划工期" align="center"></el-table-column>
           <el-table-column prop="taskNormalPreTasks" :formatter="taskNormalPreTasksFormat" label="紧前任务" align="center"></el-table-column>
           <el-table-column prop="taskRealPreTasks" :formatter="taskRealPreTasksFormat" label="真紧前任务" align="center"></el-table-column>
@@ -211,12 +206,26 @@ export default {
         procName: '',
         procProjUid: '',
         procProjName: '',
-        procPlanStartDate: '',
-        procPlanFinishDate: '',
+        procPlanStartDateTime: '',
+        procPlanFinishDateTime: '',
         procPlanDur: '',
         procState: '',
         procAuthor: '',
         procDescription: ''
+      },
+      rules: {
+        procName: [
+          { required: true, message: '不能为空' }
+        ],
+        procId: [
+          { required: true, message: '不能为空' }
+        ],
+        procProjName: [
+          { required: true, message: '不能为空' }
+        ],
+        procState: [
+          { required: true, message: '不能为空' }
+        ]
       },
       projListTree: [],
       projList: [],
@@ -227,9 +236,34 @@ export default {
   created() {
     this.getProjListTree()
     this.getProjList()
-    this.getProcList()
+    this.getProcList().then(() => {
+      if (this.procList.length > 0) {
+        this.currProc = this.procList[0]
+        this.getTaskListByProcUid()
+      }
+    })
+  },
+  watch: {
+    'form.procPlanStartDateTime'() {
+      this.planStartChange()
+    },
+    'form.procPlanFinishDateTime'() {
+      this.planFinishChange()
+    },
+    'form.procPlanDur'() {
+      this.planDurChange()
+    }
   },
   methods: {
+    // 格式化时间
+    datetimeFormat(row, column, cellValue) {
+      const datetime = cellValue
+      if (datetime === undefined || datetime === null) {
+        return ''
+      }
+      const moment = require('moment')
+      return moment(datetime).format('YYYY-MM-DD HH:mm')
+    },
     // 格式化流程状态列
     procStateFormat(row) {
       switch (row.procState) {
@@ -277,6 +311,56 @@ export default {
       }
       return preTaskIds.join(',')
     },
+    // 判断str是否为空或空字符串
+    strIsEmpty(str) {
+      if (str === undefined || str === null || str === '') {
+        return true
+      }
+    },
+    // 表单中计划时间变化时
+    planStartChange() {
+      if (!this.strIsEmpty(this.form.procPlanStartDateTime) && !this.strIsEmpty(this.form.procPlanFinishDateTime)) {
+        const start = new Date(this.form.procPlanStartDateTime).getTime()
+        const finish = new Date(this.form.procPlanFinishDateTime).getTime()
+        const dur = Math.floor((finish - start) / (1000 * 3600 * 24))
+        this.form.procPlanDur = dur
+      } else if (!this.strIsEmpty(this.form.procPlanStartDateTime) && !this.strIsEmpty(this.form.procPlanDur)) {
+        const start = new Date(this.form.procPlanStartDateTime).getTime()
+        const dur = this.form.procPlanDur * (1000 * 3600 * 24)
+        const finish = new Date(start + dur)
+        this.form.procPlanFinishDateTime = finish
+      }
+    },
+    planFinishChange() {
+      if (!this.strIsEmpty(this.form.procPlanStartDateTime) && !this.strIsEmpty(this.form.procPlanFinishDateTime)) {
+        const start = new Date(this.form.procPlanStartDateTime).getTime()
+        const finish = new Date(this.form.procPlanFinishDateTime).getTime()
+        const dur = Math.floor((finish - start) / (1000 * 3600 * 24))
+        this.form.procPlanDur = dur
+      } else if (!this.strIsEmpty(this.form.procPlanFinishDateTime) && !this.strIsEmpty(this.form.procPlanDur)) {
+        const finish = new Date(this.form.procPlanFinishDateTime).getTime()
+        const dur = this.form.procPlanDur * (1000 * 3600 * 24)
+        const start = new Date(finish - dur)
+        this.form.procPlanFinishDateTime = start
+      }
+    },
+    planDurChange() {
+      const regPos = /^\d+(\.\d+)?$/
+      if (!regPos.test(this.form.procPlanDur)) {
+        return
+      }
+      if (!this.strIsEmpty(this.form.procPlanStartDateTime) && !this.strIsEmpty(this.form.procPlanDur)) {
+        const start = new Date(this.form.procPlanStartDateTime).getTime()
+        const dur = this.form.procPlanDur * (1000 * 3600 * 24)
+        const finish = new Date(start + dur)
+        this.form.procPlanFinishDateTime = finish
+      } else if (!this.strIsEmpty(this.form.procPlanFinishDateTime) && !this.strIsEmpty(this.form.procPlanDur)) {
+        const finish = new Date(this.form.procPlanFinishDateTime).getTime()
+        const dur = this.form.procPlanDur * (1000 * 3600 * 24)
+        const start = new Date(finish - dur)
+        this.form.procPlanFinishDateTime = start
+      }
+    },
     // 请求项目树数据
     async getProjListTree() {
       const { data: res } = await this.$http.get('/proj/getProjTableData')
@@ -312,7 +396,15 @@ export default {
     ProjTreeNodeClick(proj) {
       this.currProj = proj
       // 更新流程表格信息
-      this.getProcListByProjUid()
+      this.getProcListByProjUid().then(() => {
+        if (this.procList.length > 0) {
+          this.currProc = this.procList[0]
+          this.getTaskListByProcUid()
+        } else {
+          this.taskList = []
+          this.currProc = {}
+        }
+      })
     },
     // 表头添加按钮函数
     handleInsertRoot() {
@@ -322,6 +414,10 @@ export default {
       }
       this.form.procProjUid = this.currProj.projUid
       this.form.procProjName = this.currProj.projName
+      // this.form.procPlanDur = this.currProj.projPlanDur
+      if (!this.strIsEmpty(this.currProj.projName)) {
+        this.form.procName = this.currProj.projName + '流程'
+      }
       // 新添流程状态默认0-"编制中"
       this.form.procState = 0
       this.dialogFormVisible = true
@@ -334,8 +430,8 @@ export default {
       this.form.procName = row.procName
       this.form.procProjUid = row.procProjUid
       this.form.procProjName = row.procProjName
-      this.form.procPlanStartDate = row.procPlanStartDate
-      this.form.procPlanFinishDate = row.procPlanFinishDate
+      this.form.procPlanStartDateTime = row.procPlanStartDateTime
+      this.form.procPlanFinishDateTime = row.procPlanFinishDateTime
       this.form.procPlanDur = row.procPlanDur
       this.form.procAuthor = row.procAuthor
       this.form.procState = row.procState
@@ -361,30 +457,46 @@ export default {
     },
     // 编制按钮函数
     handleDev(index, row) {
-      console.log(index, row)
       this.$router.push({ path: '/procDev', query: { procUid: row.procUid } })
+    },
+    // 发布按钮函数
+    async handlePublish(index, row) {
+      const { data: res } = await this.$http.post('/proc/publishProc', row)
+      if (res === 'success') {
+        this.$message.success('发布成功!')
+        await this.$router.push({ path: '/projManager' })
+      } else {
+        this.$message.error('发布失败!')
+      }
     },
     // 表单提交按钮函数
     onSubmit() {
-      this.$http.post('/proc/saveOrUpdate', this.form).then(() => {
-        // 刷新流程列表数据
-        if (Object.keys(this.currProj).length === 0) {
-          this.getProcList()
-        } else {
-          this.getProcListByProjUid()
-        }
-        this.$message.success('保存成功！')
-        // 隐藏对话框
-        this.dialogFormVisible = false
+      this.$refs.form.validate(async valid => {
+        if (!valid) return false
+        this.$http.post('/proc/saveOrUpdate', this.form).then(() => {
+          // 刷新流程列表数据
+          if (Object.keys(this.currProj).length === 0) {
+            this.getProcList()
+          } else {
+            this.getProcListByProjUid()
+          }
+          this.$message.success('保存成功！')
+          // 隐藏对话框
+          this.dialogFormVisible = false
+        })
       })
     },
     // 选中对应项目备选列中的一个proj
     selectProjClick(proj) {
+      if (!this.strIsEmpty(proj.projName)) {
+        this.form.procName = proj.projName + '流程'
+      }
       this.form.procProjUid = proj.projUid
       this.form.procProjName = proj.projName
     },
     // 清空对应项目
     selectProjClear() {
+      this.form.procName = ''
       this.form.procProjUid = ''
       this.form.procProjName = ''
     }
@@ -400,6 +512,17 @@ export default {
   .down-main {
     padding: 0;
     height: 70%;
+  }
+  .el-table-up-head {
+    margin: 0;
+    width: 100%;
+    height: 46px;
+    /*border: 1px dashed #c1c1cd;*/
+    /*border-radius: 3px;*/
+    /*cursor: pointer;*/
+    justify-content: center;
+    display: flex;
+    line-height: 46px
   }
   .el-aside {
     background: #ded;

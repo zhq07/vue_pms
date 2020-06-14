@@ -1,7 +1,5 @@
 <template>
-  <div>
-    自定义流程仿真
-  </div>
+    <div>自定义流程仿真</div>
 </template>
 
 <script>

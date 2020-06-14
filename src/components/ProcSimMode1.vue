@@ -1,7 +1,5 @@
 <template>
-  <div>
-    已固定流程仿真
-  </div>
+    <div>已固定流程仿真</div>
 </template>
 
 <script>

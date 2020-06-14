@@ -71,6 +71,10 @@
               <i class="el-icon-collection-tag"></i>
               <span slot="title">场地资源</span>
             </el-menu-item>
+            <el-menu-item index="/knowlManager">
+              <i class="el-icon-document"></i>
+              <span slot="title">知识资源</span>
+            </el-menu-item>
           </el-submenu>
           <el-menu-item index="/orgManager">
             <i class="el-icon-office-building"></i>

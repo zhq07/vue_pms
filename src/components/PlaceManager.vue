@@ -12,8 +12,8 @@
       <el-main>
         <el-table
           :data="placeList"
-          style="width: 100%; margin-bottom: 20px;"
           row-key="placeUid"
+          :default-sort="{ prop: 'placeId' }"
           height="100%"
           :header-cell-style="{'text-align':'center', background:'#ddd'}"
           highlight-current-row
@@ -21,7 +21,7 @@
           <el-table-column prop="placeId" label="编号" align="center" sortable width="120"></el-table-column>
           <el-table-column prop="placeName" label="名称" align="center" width="220"></el-table-column>
           <el-table-column prop="placeOrgName" label="所属组织" align="center" width="220"></el-table-column>
-          <el-table-column prop="placeType" label="类型" align="center" width="150"></el-table-column>
+          <el-table-column prop="placeType" :formatter="placeTypeFormat" label="类型" align="center" width="150"></el-table-column>
           <el-table-column prop="placeArea" label="面积" align="center" width="150"></el-table-column>
           <el-table-column label="操作" align="center" width="200">
             <template slot="header">
@@ -85,7 +85,14 @@
               <el-col :span="12">
                 <div class="grid-content bg-purple">
                   <el-form-item label="场地类型">
-                    <el-input clearable v-model="form.placeType"></el-input>
+                    <el-select v-model="form.placeType" clearable filterable placeholder="请选择">
+                      <el-option
+                        v-for="type in placeTypeOptions"
+                        :key="type.value"
+                        :label="type.label"
+                        :value="type.value">
+                      </el-option>
+                    </el-select>
                   </el-form-item>
                 </div>
               </el-col>
@@ -135,6 +142,16 @@ export default {
         placeArea: '',
         placeDesc: ''
       },
+      placeTypeOptions: [{
+        value: 0,
+        label: '仓库'
+      }, {
+        value: 1,
+        label: '露天场地'
+      }, {
+        value: 2,
+        label: '会议室'
+      }],
       orgListTree: [],
       orgList: [],
       placeList: []
@@ -146,6 +163,14 @@ export default {
     this.getPlaceList()
   },
   methods: {
+    // 格式化场地类型列
+    placeTypeFormat(row) {
+      switch (row.placeType) {
+        case 0: return '仓库'
+        case 1: return '露天场地'
+        case 2: return '会议室'
+      }
+    },
     // 请求组织树数据
     async getOrgListTree() {
       const { data: res } = await this.$http.get('/org/getOrgTableData')
