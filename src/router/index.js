@@ -7,6 +7,7 @@ import OrgManager from '../components/OrgManager'
 import ProjOpt from '../components/ProjOpt'
 import ProcManager from '../components/ProcManager'
 import ProcDev from '../components/ProcDev'
+import ProcSim from '../components/ProcSim'
 import ProcSimMode1 from '../components/ProcSimMode1'
 import ProcSimMode2 from '../components/ProcSimMode2'
 import HumanManager from '../components/HumanManager'
@@ -29,6 +30,7 @@ const routes = [
       { path: '/projOpt', component: ProjOpt },
       { path: '/procManager', component: ProcManager },
       { path: '/procDev', component: ProcDev },
+      { path: '/procSim', component: ProcSim },
       { path: '/procSimMode1', component: ProcSimMode1 },
       { path: '/procSimMode2', component: ProcSimMode2 },
       { path: '/humanManager', component: HumanManager },

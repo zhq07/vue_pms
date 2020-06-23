@@ -278,7 +278,7 @@
       <!--    侧边-->
       <el-aside class="down-middle-aside" width="250px">
         <el-card :body-style="{ padding: '14px' }">
-          <span @click="getAllEquipClick" style="cursor: pointer;">查看全部</span>
+          <span @click="getAllClick" style="cursor: pointer;">查看全部</span>
         </el-card>
         <el-tree :expand-on-click-node="false" node-key="orgUid" default-expand-all :data="orgListTree" :props="OrgTreeProps" @node-click="OrgTreeNodeClick"></el-tree>
       </el-aside>
@@ -290,6 +290,7 @@
               :data="humList"
               height="390px"
               row-key="humUid"
+              :default-sort="{ prop: 'humId' }"
               :header-cell-style="{'text-align':'center', background:'#ddd'}"
               highlight-current-row
               border>
@@ -318,6 +319,7 @@
               :data="equipList"
               height="390px"
               row-key="equipUid"
+              :default-sort="{ prop: 'equipId' }"
               :header-cell-style="{'text-align':'center', background:'#ddd'}"
               highlight-current-row
               border>
@@ -345,6 +347,7 @@
               :data="placeList"
               row-key="placeUid"
               height="390px"
+              :default-sort="{ prop: 'placeId' }"
               :header-cell-style="{'text-align':'center', background:'#ddd'}"
               highlight-current-row
               border>
@@ -367,7 +370,34 @@
               </el-table-column>
             </el-table>
           </el-tab-pane>
-          <el-tab-pane label="知识" name="know">知识</el-tab-pane>
+          <el-tab-pane label="知识" name="knowl">
+            <el-table
+              :data="knowlList"
+              row-key="knowlUid"
+              height="390px"
+              :default-sort="{ prop: 'knowlId' }"
+              :header-cell-style="{'text-align':'center', background:'#ddd'}"
+              highlight-current-row
+              border>
+              <el-table-column prop="knowlId" label="编号" align="center" sortable width="100"></el-table-column>
+              <el-table-column prop="knowlName" label="名称" align="center"></el-table-column>
+              <el-table-column prop="knowlType"  label="类型" align="center" width="80"></el-table-column>
+              <el-table-column prop="knowlAmount" label="数量" align="center" width="80"></el-table-column>
+              <el-table-column label="操作" align="center" width="70">
+                <template slot="header">
+                  <div style="background-color: #ddd; color: #909399; cursor: pointer;">添加</div>
+                </template>
+                <template slot-scope="scope">
+                  <el-button
+                    type="primary" plain round
+                    icon="el-icon-plus"
+                    size="mini"
+                    @click="addResReq(scope.row)">
+                  </el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-tab-pane>
         </el-tabs>
       </el-main>
       <!--    分割中右-->
@@ -541,7 +571,7 @@
               border>
               <el-table-column prop="resId" sortable label="编号" align="center" width="100"></el-table-column>
               <el-table-column prop="resName" label="名称" align="center"></el-table-column>
-              <el-table-column prop="resAbilityType" :formatter="resAbilityTypeFormat" label="能力" align="center" width="110"></el-table-column>
+              <el-table-column prop="resAbilityType" :formatter="resAbilityTypeFormat" label="能力" align="center" width="100"></el-table-column>
               <el-table-column prop="resReqResStartDateTime" label="占用开始" align="center" width="100">
                 <template slot-scope="scope">
                   <span v-if="scope.row.isSet">
@@ -582,7 +612,15 @@
                   <span v-else>{{ scope.row.resReqResWork }}</span>
                 </template>
               </el-table-column>
-              <el-table-column prop="resReqResWorkModel" :formatter="resWorkModelFormat" label="执行模式" align="center" width="90">
+              <el-table-column prop="resReqResAmount" label="数量" align="center">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.isSet">
+                    <el-input size="mini" placeholder="数量" clearable v-model="currResReq.resReqResAmount"></el-input>
+                  </span>
+                  <span v-else>{{ scope.row.resReqResAmount }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="resReqResWorkModel" :formatter="resWorkModelFormat" label="执行模式" align="center" width="80">
                 <template slot-scope="scope">
                   <span v-if="scope.row.isSet">
                     <el-select size="mini" v-model="currResReq.resReqResWorkModel" clearable filterable placeholder="执行模式">
@@ -608,7 +646,92 @@
               </el-table-column>
             </el-table>
           </el-tab-pane>
-          <el-tab-pane label="知识" name="know">知识</el-tab-pane>
+          <el-tab-pane label="知识" name="knowl">
+            <el-table
+              :data="resReqKnowlList"
+              height="390px"
+              row-key="resReqUid"
+              :default-sort="{ prop: 'resId' }"
+              :header-cell-style="{'text-align':'center', background:'#ddd'}"
+              highlight-current-row
+              border>
+              <el-table-column prop="resId" sortable label="编号" align="center" width="100"></el-table-column>
+              <el-table-column prop="resName" label="名称" align="center"></el-table-column>
+              <el-table-column prop="resAbilityType" label="能力" align="center" width="100"></el-table-column>
+              <el-table-column prop="resReqResStartDateTime" label="占用开始" align="center" width="100">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.isSet">
+                    <el-date-picker
+                      size="mini"
+                      clearable
+                      v-model="currResReq.resReqResStartDateTime"
+                      type="datetime"
+                      :default-time="'08:00:00'"
+                      format="yyyy-MM-dd HH:mm"
+                      placeholder="占用开始">
+                    </el-date-picker>
+                  </span>
+                  <span v-else>{{ datetimeFormat(scope.row.resReqResStartDateTime) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="resReqResFinishDateTime" label="占用结束" align="center" width="100">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.isSet">
+                    <el-date-picker
+                      size="mini"
+                      clearable
+                      v-model="currResReq.resReqResFinishDateTime"
+                      type="datetime"
+                      :default-time="'08:00:00'"
+                      format="yyyy-MM-dd HH:mm"
+                      placeholder="占用结束">
+                    </el-date-picker>
+                  </span>
+                  <span v-else>{{ datetimeFormat(scope.row.resReqResFinishDateTime) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="resReqResWork" label="工时/天" align="center" width="90">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.isSet">
+                    <el-input size="mini" placeholder="工时" clearable v-model="currResReq.resReqResWork"></el-input>
+                  </span>
+                  <span v-else>{{ scope.row.resReqResWork }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="resReqResAmount" label="数量" align="center">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.isSet">
+                    <el-input size="mini" placeholder="数量" clearable v-model="currResReq.resReqResAmount"></el-input>
+                  </span>
+                  <span v-else>{{ scope.row.resReqResAmount }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="resReqResWorkModel" :formatter="resWorkModelFormat" label="执行模式" align="center" width="80">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.isSet">
+                    <el-select size="mini" v-model="currResReq.resReqResWorkModel" clearable filterable placeholder="执行模式">
+                      <el-option
+                        v-for="workModel in taskWorkModelOptions"
+                        :key="workModel.value"
+                        :label="workModel.label"
+                        :value="workModel.value">
+                      </el-option>
+                    </el-select>
+                  </span>
+                  <span v-else>{{ resWorkModelFormat(scope.row) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="100">
+                <template slot-scope="scope">
+                  <span class="el-tag el-tag--plain el-tag--info el-tag--mini" style="cursor: pointer;" @click="editResReq(scope.row, scope.$index, true)">
+                    {{ scope.row.isSet ? '保存' : '修改' }}
+                  </span>
+                  <span v-if="!scope.row.isSet" class="el-tag el-tag--plain el-tag--danger el-tag--mini" style="cursor: pointer;" @click="deleteResReq(scope.row)">删除</span>
+                  <span v-else class="el-tag el-tag--plain el-tag--mini" style="cursor: pointer;" @click="editResReq(scope.row, scope.$index, false)">取消</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-tab-pane>
         </el-tabs>
       </el-aside>
     </el-container>
@@ -699,10 +822,12 @@ export default {
       equipList: [],
       humList: [],
       placeList: [],
+      knowlList: [],
       resReqList: [],
       resReqHumList: [],
       resReqEquipList: [],
-      resReqPlaceList: []
+      resReqPlaceList: [],
+      resReqKnowlList: []
     }
   },
   created() {
@@ -735,6 +860,7 @@ export default {
     this.getHumList()
     this.getEquipList()
     this.getPlaceList()
+    this.getKnowlList()
   },
   watch: {
     'currTask.pmsTask.taskPlanStartDateTime'() {
@@ -831,7 +957,7 @@ export default {
     // 格式化场地类型列
     placeTypeFormat(row) {
       switch (row.placeType) {
-        case 0: return '仓库'
+        case 0: return '室内仓库'
         case 1: return '露天场地'
         case 2: return '会议室'
       }
@@ -839,9 +965,12 @@ export default {
     // 格式化资源能力
     resAbilityTypeFormat(row) {
       switch (row.resAbilityType) {
-        case '0': return '仓库'
-        case '1': return '露天场地'
-        case '2': return '会议室'
+        case '0':
+        case 0: return '室内仓库'
+        case '1':
+        case 1: return '露天场地'
+        case '2':
+        case 2: return '会议室'
         default: return row.resAbilityType
       }
     },
@@ -1044,6 +1173,16 @@ export default {
       const { data: res } = await this.$http.get('/place/getPlaceListByOrgUid/' + this.currOrg.orgUid)
       this.placeList = res
     },
+    // 请求全部知识列表
+    async getKnowlList() {
+      const { data: res } = await this.$http.get('/knowl/getKnowledgeList')
+      this.knowlList = res
+    },
+    // 根据组织UID请求知识列表
+    async getKnowlListByOrgUid() {
+      const { data: res } = await this.$http.get('/knowl/getKnowledgeListByOrgUid/' + this.currOrg.orgUid)
+      this.knowlList = res
+    },
     // 请求资源需求列表
     async getResReqList() {
       const { data: res } = await this.$http.get('/taskResReq/getResReqListByTaskResPlanUid/' + this.currTaskResPlan.resPlanUid)
@@ -1055,6 +1194,7 @@ export default {
       this.resReqHumList = []
       this.resReqEquipList = []
       this.resReqPlaceList = []
+      this.resReqKnowlList = []
       for (let i = 0, len = res.length; i < len; i++) {
         switch (res[i].resReqResType) {
           case 0:
@@ -1063,6 +1203,8 @@ export default {
             this.resReqEquipList.push(res[i]); break
           case 2:
             this.resReqPlaceList.push(res[i]); break
+          case 3:
+            this.resReqKnowlList.push(res[i]); break
           default: break
         }
       }
@@ -1150,6 +1292,7 @@ export default {
             this.resReqHumList = []
             this.resReqEquipList = []
             this.resReqPlaceList = []
+            this.resReqKnowlList = []
           }
         })
         row.isSet = true
@@ -1168,6 +1311,7 @@ export default {
           this.resReqHumList = []
           this.resReqEquipList = []
           this.resReqPlaceList = []
+          this.resReqKnowlList = []
         }
         this.$message.success('删除成功！')
       })
@@ -1208,6 +1352,7 @@ export default {
           this.resReqHumList = []
           this.resReqEquipList = []
           this.resReqPlaceList = []
+          this.resReqKnowlList = []
         }
       })
     },
@@ -1298,6 +1443,7 @@ export default {
         resReqResStartDateTime: '',
         resReqResFinishDateTime: '',
         resReqResWork: '',
+        resReqAmount: '',
         resReqResWorkModel: 0,
         isSet: true
       }
@@ -1324,7 +1470,17 @@ export default {
           tempResReq.resId = row.placeId
           tempResReq.resName = row.placeName
           tempResReq.resAbilityType = row.placeType
+          tempResReq.resReqResAmount = row.resReqResAmount
           this.resReqPlaceList.push(tempResReq)
+          break
+        case 'knowl':
+          tempResReq.resReqResType = 3
+          tempResReq.resReqResUid = row.knowlUid
+          tempResReq.resId = row.knowlId
+          tempResReq.resName = row.knowlName
+          tempResReq.resAbilityType = row.knowlType
+          tempResReq.resReqResAmount = row.resReqResAmount
+          this.resReqKnowlList.push(tempResReq)
           break
         default: console.log('未知类型')
       }
@@ -1352,6 +1508,9 @@ export default {
             case 2 :
               this.resReqPlaceList.splice(index, 1)
               break
+            case 3 :
+              this.resReqKnowlList.splice(index, 1)
+              break
           }
         }
         return (row.isSet = !row.isSet)
@@ -1377,10 +1536,11 @@ export default {
       })
     },
     // 查看全部按钮
-    getAllEquipClick() {
+    getAllClick() {
       this.getHumList()
       this.getEquipList()
       this.getPlaceList()
+      this.getKnowlList()
       // 清空当前选中组织
       this.currOrg = {}
     },
@@ -1391,6 +1551,7 @@ export default {
       this.getHumListByOrgUid()
       this.getEquipListByOrgUid()
       this.getPlaceListByOrgUid()
+      this.getKnowlListByOrgUid()
     }
   }
 }

@@ -381,7 +381,7 @@ export default {
       this.humList = res
       // 按id排序
       this.humList.sort((a, b) => {
-        return a.humId - b.humId
+        return a.humId.localeCompare(b.humId)
       })
       if (this.humList.length > 0) {
         this.currHum = this.humList[0]
@@ -397,7 +397,7 @@ export default {
       this.humList = res
       // 按id排序
       this.humList.sort((a, b) => {
-        return a.humId - b.humId
+        return a.humId.localeCompare(b.humId)
       })
       if (this.humList.length > 0) {
         this.currHum = this.humList[0]
@@ -650,15 +650,15 @@ export default {
             '<br/><span>结束: {point.end:%Y-%m-%d, %H:%M}</span>'
         },
         xAxis: {
-          type: 'datetime',
+          // type: 'datetime',
           // tickInterval: 7 * 24 * 3600 * 1000,
-          dateTimeLabelFormats: {
-            day: '%m/%d',
-            month: '%y年%m月',
-            week: '%m/%d',
-            year: '%Y年',
-            millisecond: '%b/%e'
-          }
+          // dateTimeLabelFormats: {
+          //   day: '%m/%d',
+          //   month: '%y年%m月',
+          //   week: '%m/%d',
+          //   year: '%Y年',
+          //   millisecond: '%b/%e'
+          // }
         },
         yAxis: {
           type: 'category',

@@ -562,7 +562,6 @@ export default {
       this.$refs.form.validate(async valid => {
         if (!valid) return false
         this.$http.post('/proj/saveOrUpdate', this.form).then(() => {
-          console.log('this.form', this.form)
           // 刷新项目表格数据
           this.getProjTableData()
           this.$message.success('保存成功！')
@@ -658,14 +657,16 @@ export default {
             label: {
               position: 'left',
               verticalAlign: 'middle',
-              align: 'right'
+              align: 'right',
+              fontSize: 16
             },
 
             leaves: {
               label: {
                 position: 'right',
                 verticalAlign: 'middle',
-                align: 'left'
+                align: 'left',
+                fontSize: 16
               }
             },
 
@@ -690,14 +691,16 @@ export default {
             label: {
               position: 'left',
               verticalAlign: 'middle',
-              align: 'right'
+              align: 'right',
+              fontSize: 16
             },
 
             leaves: {
               label: {
                 position: 'right',
                 verticalAlign: 'middle',
-                align: 'left'
+                align: 'left',
+                fontSize: 16
               }
             },
 

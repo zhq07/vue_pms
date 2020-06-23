@@ -121,10 +121,10 @@
               :header-cell-style="{'text-align':'center', background:'#ddd'}"
               highlight-current-row
               border>
-              <el-table-column prop="arResId" sortable label="资源编号" align="center" width="110"></el-table-column>
-              <el-table-column prop="arResName" label="资源名称" align="center" width="110"></el-table-column>
-              <el-table-column prop="arProjName" label="占用项目" align="center" width="220"></el-table-column>
-              <el-table-column prop="arTaskName" label="占用任务" align="center" width="210"></el-table-column>
+              <el-table-column prop="arResId" sortable label="资源编号" align="center" width="140"></el-table-column>
+              <el-table-column prop="arResName" label="资源名称" align="center" width="160"></el-table-column>
+              <el-table-column prop="arProjName" label="占用项目" align="center" width="200"></el-table-column>
+              <el-table-column prop="arTaskName" label="占用任务" align="center" width="200"></el-table-column>
               <el-table-column prop="pmsAllocateResource.arResStartDateTime" label="开始时间" align="center" width="220">
                 <template slot-scope="scope">
                   <span>{{ datetimeFormat(scope.row.pmsAllocateResource.arResStartDateTime) }}</span>
@@ -332,11 +332,11 @@ export default {
     // 请求全部设备列表
     async getEquipList() {
       const { data: res } = await this.$http.get('/equip/getEquipList')
-      this.equipList = res
       // 按id排序
-      this.equipList.sort((a, b) => {
-        return a.equipId - b.equipId
+      res.sort((a, b) => {
+        return a.equipId.localeCompare(b.equipId)
       })
+      this.equipList = res
       if (this.equipList.length > 0) {
         this.currEquip = this.equipList[0]
         this.getArList()
@@ -348,11 +348,11 @@ export default {
     // 根据组织UID请求设备列表
     async getEquipListByOrgUid() {
       const { data: res } = await this.$http.get('/equip/getEquipListByOrgUid/' + this.currOrg.orgUid)
-      this.equipList = res
       // 按id排序
-      this.equipList.sort((a, b) => {
-        return a.equipId - b.equipId
+      res.sort((a, b) => {
+        return a.equipId.localeCompare(b.equipId)
       })
+      this.equipList = res
       if (this.equipList.length > 0) {
         this.currEquip = this.equipList[0]
         this.getArList()
@@ -387,7 +387,6 @@ export default {
       }
       const { data: res } = await this.$http.post('/ar/getChartAllocateResourceListByResUids', resUidsResType)
       this.chartArList = res
-      console.log('this.chartArList', this.chartArList)
     },
     // 请求项目列表数据
     async getProjList() {
@@ -602,15 +601,15 @@ export default {
             '<br/><span>结束: {point.end:%Y-%m-%d, %H:%M}</span>'
         },
         xAxis: {
-          type: 'datetime',
+          // type: 'datetime',
           // tickInterval: 7 * 24 * 3600 * 1000,
-          dateTimeLabelFormats: {
-            day: '%m/%d',
-            month: '%y年%m月',
-            week: '%m/%d',
-            year: '%Y年',
-            millisecond: '%b/%e'
-          }
+          // dateTimeLabelFormats: {
+          //   day: '%m/%d',
+          //   month: '%y年%m月',
+          //   week: '%m/%d',
+          //   year: '%Y年',
+          //   millisecond: '%b/%e'
+          // }
         },
         yAxis: {
           type: 'category',

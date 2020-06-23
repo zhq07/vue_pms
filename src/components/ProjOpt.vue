@@ -47,6 +47,7 @@
       <el-aside width="36%">
         <div class="el-table-up-head" style="width: 100%;">
           <span @click="optStart" style="cursor: pointer;">开始优化</span>
+          <span @click="procSim" style="cursor: pointer;"> / 结果仿真</span>
         </div>
         <el-table
           :data="optProcList"
@@ -104,12 +105,6 @@
           <el-tab-pane label="项目甘特图" name="resultGantt">
             <div id="taskGanttContainer" style="width: 100%"></div>
           </el-tab-pane>
-          <el-tab-pane label="资源甘特图" name="resGantt">
-            <div id="resGanttContainer" style="width: 1780px"></div>
-          </el-tab-pane>
-          <el-tab-pane label="资源统计" name="resultRes">
-            <div id="humanAr" style="height: 450px; width: 1780px"></div>
-          </el-tab-pane>
         </el-tabs>
 <!--        <div class="el-table-up-head" style="width: 100%;"><span>优化结果</span></div>-->
       </el-main>
@@ -122,6 +117,7 @@ export default {
   data() {
     return {
       activeTagName: 'resultTaskList',
+      activeResChartName: 'humAr',
       ProjTreeProps: {
         children: 'children',
         label: 'projName'
@@ -279,14 +275,14 @@ export default {
       this.$http.post('/projOpt/getOptResult', this.optProcUidList).then(res => {
         // 刷新任务列表数据
         this.optResult = res.data
-        this.taskList = this.optResult.taskList
-        this.taskList.sort((a, b) => {
+        this.optResult.taskList.sort((a, b) => {
           return a.pmsTask.taskProcUid.localeCompare(b.pmsTask.taskProcUid)
         })
-        // 给任务增加紧前任务名称数组属性
+        this.taskList = this.optResult.taskList
+        // 给任务增加紧前任务UID数组属性
         for (let i = 0, len = this.taskList.length; i < len; i++) {
           let preTasks = []
-          let preTaskUids = []
+          const preTaskUids = []
           if (this.taskList[i].taskRealPreTasks !== undefined && this.taskList[i].taskRealPreTasks !== null && this.taskList[i].taskRealPreTasks.length > 0) {
             preTasks = this.taskList[i].taskRealPreTasks
           } else {
@@ -294,30 +290,24 @@ export default {
               preTasks = this.taskList[i].taskNormalPreTasks
             }
           }
-          preTaskUids = preTasks.map((pmsTask) => {
-            return pmsTask.taskUid
-          })
+          for (let i = 0, len = preTasks.length; i < len; i++) {
+            const pmsTask = preTasks[i]
+            preTaskUids.push(pmsTask.taskUid)
+          }
           this.taskList[i].preTaskUids = preTaskUids
-        }
-        this.arList = this.optResult.resOcpyNodesList
-        this.arList.sort((a, b) => {
-          return a[0].resName.localeCompare(b[0].resName)
-        })
-        this.humanArList = []
-        this.equipArList = []
-        for (let i = 0, len = this.arList.length; i < len; i++) {
-          const resAr = this.arList[i]
-          if (resAr[0].resType === 0) {
-            this.humanArList.push(resAr)
-          }
-          if (resAr[0].resType === 1) {
-            this.equipArList.push(resAr)
-          }
         }
         this.$message.success('优化结束！')
         this.taskGantt()
-        this.humanArEcharts()
-        this.resGantt()
+      })
+    },
+    // 结果仿真，跳转
+    procSim() {
+      this.$router.push({
+        path: '/procSim',
+        query: {
+          optResult: JSON.stringify(this.optResult),
+          optProcList: JSON.stringify(this.optProcList)
+        }
       })
     },
     // 任务甘特图
@@ -415,177 +405,6 @@ export default {
           }
         }
       })
-    },
-    // 资源占用甘特图
-    resGantt() {
-      const map = this.$highcharts.map
-      const timeDiff = 1000 * 3600 * 8
-      // Parse car data into series.
-      const series = this.humanArList.map(function (resAr, i) {
-        const data = resAr.map(function (deal) {
-          return {
-            id: 'deal-' + i,
-            projName: deal.projName,
-            taskName: deal.taskName,
-            start: new Date(deal.resStartDateTime).getTime() + timeDiff,
-            end: new Date(deal.resFinishDateTime).getTime() + timeDiff,
-            y: i
-          }
-        })
-        return {
-          name: resAr[0].resName,
-          data: data
-        }
-      })
-      this.$highcharts.ganttChart('resGanttContainer', {
-        navigator: {
-          enabled: true,
-          series: {
-            type: 'gantt',
-            pointPlacement: 0.5,
-            pointPadding: 0.25
-          },
-          yAxis: {
-            min: 0,
-            max: 3,
-            reversed: true,
-            categories: []
-          }
-        },
-        scrollbar: {
-          enabled: true
-        },
-        series: series,
-        tooltip: {
-          xDateFormat: '%Y %m %d, %H:%M',
-          pointFormat: '<span>项目: {point.projName}</span>' +
-            '<br/><span>任务: {point.taskName}</span>' +
-            '<br/><span>开始: {point.start:%Y-%m-%d, %H:%M}</span>' +
-            '<br/><span>结束: {point.end:%Y-%m-%d, %H:%M}</span>'
-        },
-        // xAxis: {
-        //   type: 'datetime',
-        //   // tickInterval: 7 * 24 * 3600 * 1000,
-        //   dateTimeLabelFormats: {
-        //     day: '%m/%d',
-        //     month: '%y年%m月',
-        //     week: '%m/%d',
-        //     year: '%Y年',
-        //     millisecond: '%b/%e'
-        //   }
-        // },
-        yAxis: {
-          type: 'category',
-          grid: {
-            columns: [{
-              title: {
-                text: '名称'
-              },
-              categories: map(series, function (s) {
-                return s.name
-              })
-            }]
-          }
-        }
-      })
-    },
-    // 人力echarts图表
-    humanArEcharts() {
-      // 基于准备好的dom，初始化echarts实例
-      const myChart = this.$echarts.init(document.getElementById('humanAr'))
-      const dataAxis = []
-      const data = []
-      for (let i = 0, len = this.humanArList.length; i < len; i++) {
-        const resAr = this.humanArList[i]
-        dataAxis.push(resAr[0].resName)
-        let work = 0
-        for (let j = 0, rlen = resAr.length; j < rlen; j++) {
-          work = work + resAr[j].resWork
-        }
-        data.push(work)
-      }
-
-      const option = {
-        title: {
-          text: '资源使用情况'
-        },
-        xAxis: {
-          data: dataAxis,
-          axisLabel: {
-            // inside: true,
-            textStyle: {
-              color: '#666',
-              fontSize: 16
-            }
-          },
-          axisTick: {
-            show: false
-          },
-          axisLine: {
-            show: false
-          },
-          z: 10
-        },
-        yAxis: {
-          axisLine: {
-            show: false
-          },
-          axisTick: {
-            show: false
-          },
-          axisLabel: {
-            textStyle: {
-              color: '#999'
-            }
-          }
-        },
-        dataZoom: [
-          {
-            type: 'inside'
-          }
-        ],
-        series: [
-          { // For shadow
-            type: 'bar',
-            itemStyle: {
-              color: 'rgba(0,0,0,0.05)'
-            },
-            barGap: '-100%',
-            barCategoryGap: '40%',
-            // data: dataShadow,
-            animation: false
-          },
-          {
-            type: 'bar',
-            itemStyle: {
-              normal: {
-                label: {
-                  show: true, // 开启显示
-                  position: 'top', // 在上方显示
-                  textStyle: { // 数值样式
-                    color: '#666',
-                    fontSize: 16
-                  }
-                }
-              }
-            },
-            data: data
-          }
-        ]
-      }
-
-      // Enable data zoom when user click bar.
-      const zoomSize = 6
-      myChart.on('click', function (params) {
-        console.log(dataAxis[Math.max(params.dataIndex - zoomSize / 2, 0)])
-        myChart.dispatchAction({
-          type: 'dataZoom',
-          startValue: dataAxis[Math.max(params.dataIndex - zoomSize / 2, 0)],
-          endValue: dataAxis[Math.min(params.dataIndex + zoomSize / 2, data.length - 1)]
-        })
-      })
-      // 使用刚指定的配置项和数据显示图表。
-      myChart.setOption(option)
     }
   }
 }
@@ -598,10 +417,10 @@ export default {
     height: 100%;
   }
   .up-container {
-    height: 30%;
+    height: 40%;
   }
   .down-container {
-    height: 70%;
+    height: 60%;
   }
   .el-table-up-head {
     margin: 0;
