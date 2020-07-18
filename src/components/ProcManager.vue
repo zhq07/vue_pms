@@ -274,9 +274,12 @@ export default {
     // 格式化任务类型列
     taskTypeFormat(row) {
       switch (row.pmsTask.taskType) {
-        case 0: return '普通'
-        case 1: return '节点'
-        case 2: return '黑盒'
+        case 0: return '主线'
+        case 1: return '辅线'
+        case 2: return '质量'
+        case 3: return '安全'
+        case 4: return '节点'
+        case 5: return '黑盒'
       }
     },
     // 格式化任务输入类型列

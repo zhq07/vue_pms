@@ -18,7 +18,7 @@
         <el-table-column prop="projPriority" label="优先级" :formatter="priorityFormat" align="center" width="100"></el-table-column>
         <el-table-column prop="projPlanStartDateTime" :formatter="dateFormat" label="计划开始" align="center" width="150"></el-table-column>
         <el-table-column prop="projPlanFinishDateTime" :formatter="dateFormat" label="计划结束" align="center" width="150"></el-table-column>
-        <el-table-column prop="projPlanDur" label="计划工期" align="center" width="105"></el-table-column>
+        <el-table-column prop="projPlanDur" label="计划工期" align="center" width="100"></el-table-column>
         <el-table-column prop="projEarlyStartDateTime" :formatter="dateFormat" label="最早开始" align="center" width="150"></el-table-column>
         <el-table-column prop="projLateFinishDateTime" :formatter="dateFormat" label="最晚结束" align="center" width="150"></el-table-column>
 <!--        <el-table-column prop="projActStartDateTime" :formatter="dateFormat" label="实际开始" align="center" width="100"></el-table-column>-->
@@ -489,8 +489,8 @@ export default {
       }
       // 清空对应任务列表
       this.taskList = []
-      // 项目优先级默认0-“普通”，状态默认0-"编制中"
-      this.form.projPriority = 0
+      // 项目重要性默认1-“普通”，状态默认0-"编制中"
+      this.form.projPriority = 1
       this.form.projState = 0
       this.form.projPctWork = 0
       this.dialogFormVisible = true

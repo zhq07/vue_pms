@@ -312,10 +312,8 @@ export default {
       setTimeout(() => {
         for (let i = 0, len = updateData.length; i < len; i++) {
           const task = updateData[i]
-          console.log('前start', task.start)
           const start = (task.start - this.zoneTime) / (Day * 6)
           const finish = (task.finish - this.zoneTime) / (Day * 6)
-          console.log('后start', start)
           setTimeout(() => {
             task.itemStyle.color = '#F96'
             myChart.setOption(option)

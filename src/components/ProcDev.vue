@@ -795,12 +795,21 @@ export default {
       }],
       taskTypeOptions: [{
         value: 0,
-        label: '普通'
+        label: '主线'
       }, {
         value: 1,
-        label: '节点'
+        label: '辅线'
       }, {
         value: 2,
+        label: '质量'
+      }, {
+        value: 3,
+        label: '安全'
+      }, {
+        value: 4,
+        label: '节点'
+      }, {
+        value: 5,
         label: '黑盒'
       }],
       taskPriorityOptions: [{
@@ -901,9 +910,12 @@ export default {
     // 格式化任务类型
     taskTypeFormat(row) {
       switch (row.pmsTask.taskType) {
-        case 0: return '普通'
-        case 1: return '节点'
-        case 2: return '黑盒'
+        case 0: return '主线'
+        case 1: return '辅线'
+        case 2: return '质量'
+        case 3: return '安全'
+        case 4: return '节点'
+        case 5: return '黑盒'
       }
     },
     // 格式化任务执行模式
