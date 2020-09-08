@@ -275,8 +275,13 @@ export default {
       this.$http.post('/projOpt/getOptResult', this.optProcUidList).then(res => {
         // 刷新任务列表数据
         this.optResult = res.data
+        console.log(this.optResult.taskList)
         this.optResult.taskList.sort((a, b) => {
-          return a.pmsTask.taskProcUid.localeCompare(b.pmsTask.taskProcUid)
+          if (a.pmsTask.taskProcUid !== b.pmsTask.taskProcUid) {
+            return a.pmsTask.taskProcUid.localeCompare(b.pmsTask.taskProcUid)
+          } else {
+            return a.pmsTask.taskId - b.pmsTask.taskId
+          }
         })
         this.taskList = this.optResult.taskList
         // 给任务增加紧前任务UID数组属性
