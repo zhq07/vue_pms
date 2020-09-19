@@ -172,7 +172,8 @@
           <el-table-column prop="pmsTask.taskPlanFinishDateTime" :formatter="datetimeFormat" label="计划结束" align="center"></el-table-column>
           <el-table-column prop="pmsTask.taskPlanDur" label="计划工期" align="center"></el-table-column>
           <el-table-column prop="taskNormalPreTasks" :formatter="taskNormalPreTasksFormat" label="紧前任务" align="center"></el-table-column>
-          <el-table-column prop="taskRealPreTasks" :formatter="taskRealPreTasksFormat" label="真紧前任务" align="center"></el-table-column>
+<!--          <el-table-column prop="taskRealPreTasks" :formatter="taskRealPreTasksFormat" label="真紧前任务" align="center"></el-table-column>-->
+          <el-table-column prop="pmsGroup.groupName" label="任务组" align="center"></el-table-column>
           <el-table-column prop="pmsTask.taskInType" :formatter="taskInTypeFormat" label="输入类型" align="center"></el-table-column>
           <el-table-column prop="pmsTask.taskOutType" :formatter="taskOutTypeFormat" label="输出类型" align="center"></el-table-column>
           <el-table-column prop="pmsTask.taskType" :formatter="taskTypeFormat" label="任务类型" align="center"></el-table-column>
@@ -305,15 +306,15 @@ export default {
       }
       return preTaskIds.join(',')
     },
-    // 格式化真紧前任务列
-    taskRealPreTasksFormat(row) {
-      const preTasks = row.taskRealPreTasks
-      const preTaskIds = []
-      for (let i = 0, len = preTasks.length; i < len; i++) {
-        preTaskIds.push(preTasks[i].taskId)
-      }
-      return preTaskIds.join(',')
-    },
+    // // 格式化真紧前任务列
+    // taskRealPreTasksFormat(row) {
+    //   const preTasks = row.taskRealPreTasks
+    //   const preTaskIds = []
+    //   for (let i = 0, len = preTasks.length; i < len; i++) {
+    //     preTaskIds.push(preTasks[i].taskId)
+    //   }
+    //   return preTaskIds.join(',')
+    // },
     // 判断str是否为空或空字符串
     strIsEmpty(str) {
       if (str === undefined || str === null || str === '') {
