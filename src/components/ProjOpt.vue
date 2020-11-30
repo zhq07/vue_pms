@@ -26,7 +26,7 @@
           <el-table-column prop="procName" label="流程名称" align="center" width="200"></el-table-column>
           <el-table-column prop="procProjName" label="对应项目" align="center" width="200"></el-table-column>
           <el-table-column prop="procPlanDur" label="计划工期" align="center" width="100"></el-table-column>
-          <el-table-column prop="procState" label="状态" :formatter="procStateFormat" align="center" width="120"></el-table-column>
+          <el-table-column prop="procState" label="状态" :formatter="procStateFormat" align="center" width="100"></el-table-column>
           <el-table-column label="操作" align="center">
             <template slot="header">
               <div style="background-color: #ddd; color: #909399; cursor: pointer;">添加</div>
@@ -47,7 +47,8 @@
       <el-aside width="36%">
         <div class="el-table-up-head" style="width: 100%;">
           <el-row>
-            <span class="el-tag el-tag--plain" @click="optStart" style="cursor: pointer; margin-right: 6px">开始优化</span>
+            <span class="el-tag el-tag--plain" @click="optStart" style="cursor: pointer; margin-right: 6px">差分进化算法</span>
+            <span class="el-tag el-tag--plain" @click="optStartGa" style="cursor: pointer; margin-right: 6px">遗传算法</span>
             <span class="el-tag el-tag--plain" @click="procSim" style="cursor: pointer; margin-left: 6px">结果仿真</span>
           </el-row>
         </div>
@@ -87,7 +88,7 @@
           <el-tab-pane label="任务列表" name="resultTaskList">
             <el-table
               :data="taskList"
-              height="480px"
+              height="500px"
               row-key="taskUid"
               :header-cell-style="{'text-align':'center', background:'#ddd'}"
               highlight-current-row
@@ -278,7 +279,43 @@ export default {
       this.$http.post('/projOpt/getOptResult', this.optProcUidList).then(res => {
         // 刷新任务列表数据
         this.optResult = res.data
-        console.log(this.optResult.taskList)
+        this.optResult.taskList.sort((a, b) => {
+          if (a.pmsTask.taskProcUid !== b.pmsTask.taskProcUid) {
+            return a.pmsTask.taskProcUid.localeCompare(b.pmsTask.taskProcUid)
+          } else {
+            return a.pmsTask.taskId - b.pmsTask.taskId
+          }
+        })
+        this.taskList = this.optResult.taskList
+        // 给任务增加紧前任务UID数组属性
+        for (let i = 0, len = this.taskList.length; i < len; i++) {
+          let preTasks = []
+          const preTaskUids = []
+          if (this.taskList[i].taskRealPreTasks !== undefined && this.taskList[i].taskRealPreTasks !== null && this.taskList[i].taskRealPreTasks.length > 0) {
+            preTasks = this.taskList[i].taskRealPreTasks
+          } else {
+            if (this.taskList[i].taskNormalPreTasks !== undefined && this.taskList[i].taskNormalPreTasks !== null && this.taskList[i].taskNormalPreTasks.length > 0) {
+              preTasks = this.taskList[i].taskNormalPreTasks
+            }
+          }
+          for (let i = 0, len = preTasks.length; i < len; i++) {
+            const pmsTask = preTasks[i]
+            preTaskUids.push(pmsTask.taskUid)
+          }
+          this.taskList[i].preTaskUids = preTaskUids
+        }
+        this.$message.success('优化结束！')
+        this.taskGantt()
+      })
+    },
+    optStartGa() {
+      this.optProcUidList = []
+      for (let i = 0, len = this.optProcList.length; i < len; i++) {
+        this.optProcUidList.push(this.optProcList[i].procUid)
+      }
+      this.$http.post('/projOpt/getOptResultGa', this.optProcUidList).then(res => {
+        // 刷新任务列表数据
+        this.optResult = res.data
         this.optResult.taskList.sort((a, b) => {
           if (a.pmsTask.taskProcUid !== b.pmsTask.taskProcUid) {
             return a.pmsTask.taskProcUid.localeCompare(b.pmsTask.taskProcUid)

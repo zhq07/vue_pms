@@ -60,7 +60,7 @@
               <span v-else>{{ datetimeFormat(scope.row.pmsTask.taskPlanFinishDateTime) }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="pmsTask.taskPlanDur" label="工期" align="center" width="100">
+          <el-table-column prop="pmsTask.taskPlanDur" label="工期/天" align="center" width="100">
             <template slot-scope="scope">
               <span v-if="scope.row.isSet">
                 <el-input size="mini" placeholder="工期" clearable v-model="currTask.pmsTask.taskPlanDur"></el-input>
@@ -111,52 +111,7 @@
               <span v-else>{{ taskNormalPreTasksFormat(scope.row) }}</span>
             </template>
           </el-table-column>
-<!--          <el-table-column prop="taskRealPreTasks" :formatter="taskRealPreTasksFormat" label="真紧前任务" align="center">-->
-<!--            <template slot-scope="scope">-->
-<!--              <span v-if="scope.row.isSet">-->
-<!--                <el-select size="mini" value-key="taskUid" v-model="currTask.taskRealPreTasks" multiple clearable filterable placeholder="真紧前任务">-->
-<!--                  <el-option-->
-<!--                    v-for="preTask in taskList"-->
-<!--                    :key="preTask.pmsTask.taskUid"-->
-<!--                    :label="preTask.pmsTask.taskName"-->
-<!--                    :value="preTask.pmsTask">-->
-<!--                  </el-option>-->
-<!--                </el-select>-->
-<!--              </span>-->
-<!--              <span v-else>{{ taskRealPreTasksFormat(scope.row) }}</span>-->
-<!--            </template>-->
-<!--          </el-table-column>-->
           <el-table-column prop="pmsGroup.groupName" label="所属任务组" align="center"></el-table-column>
-<!--          <el-table-column prop="pmsTask.taskInType" :formatter="taskInTypeFormat" label="输入类型" align="center" width="90">-->
-<!--            <template slot-scope="scope">-->
-<!--              <span v-if="scope.row.isSet">-->
-<!--                <el-select size="mini" v-model="currTask.pmsTask.taskInType" clearable filterable placeholder="输入类型">-->
-<!--                  <el-option-->
-<!--                    v-for="inType in taskInTypeOptions"-->
-<!--                    :key="inType.value"-->
-<!--                    :label="inType.label"-->
-<!--                    :value="inType.value">-->
-<!--                  </el-option>-->
-<!--                </el-select>-->
-<!--              </span>-->
-<!--              <span v-else>{{ taskInTypeFormat(scope.row) }}</span>-->
-<!--            </template>-->
-<!--          </el-table-column>-->
-<!--          <el-table-column prop="pmsTask.taskOutType" :formatter="taskOutTypeFormat" label="输出类型" align="center" width="90">-->
-<!--            <template slot-scope="scope">-->
-<!--              <span v-if="scope.row.isSet">-->
-<!--                <el-select size="mini" v-model="currTask.pmsTask.taskOutType" clearable filterable placeholder="输出类型">-->
-<!--                  <el-option-->
-<!--                    v-for="outType in taskOutTypeOptions"-->
-<!--                    :key="outType.value"-->
-<!--                    :label="outType.label"-->
-<!--                    :value="outType.value">-->
-<!--                  </el-option>-->
-<!--                </el-select>-->
-<!--              </span>-->
-<!--              <span v-else>{{ taskOutTypeFormat(scope.row) }}</span>-->
-<!--            </template>-->
-<!--          </el-table-column>-->
           <el-table-column prop="pmsTask.taskWorkModel" :formatter="taskWorkModelFormat" label="执行模式" align="center" width="100">
             <template slot-scope="scope">
               <span v-if="scope.row.isSet">
@@ -187,10 +142,10 @@
               <span v-else>{{ taskTypeFormat(scope.row) }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="pmsTask.taskPriority" :formatter="taskPriorityFormat" label="优先级" align="center" width="100">
+          <el-table-column prop="pmsTask.taskPriority" :formatter="taskPriorityFormat" label="重要性" align="center" width="100">
             <template slot-scope="scope">
               <span v-if="scope.row.isSet">
-                <el-select size="mini" v-model="currTask.pmsTask.taskPriority" clearable placeholder="优先级">
+                <el-select size="mini" v-model="currTask.pmsTask.taskPriority" clearable placeholder="重要性">
                   <el-option
                     v-for="taskPriority in taskPriorityOptions"
                     :key="taskPriority.value"
@@ -202,13 +157,14 @@
               <span v-else>{{ taskPriorityFormat(scope.row) }}</span>
             </template>
           </el-table-column>
-          <el-table-column align="center" label="操作" width="220">
+          <el-table-column align="center" label="操作" width="180">
             <template slot="header">
               <div style="background-color: #ddd; color: #909399;">
                 <el-row>
-                  <span class="el-tag el-tag--plain" style="background-color: #eee; cursor: pointer" @click="addTask()">添加</span>
-                  <span class="el-tag el-tag--plain" style="background-color: #eee; margin: 0px 5px; cursor: pointer;" @click="updatePmsTaskIds()">编号</span>
-                  <span class="el-tag el-tag--plain" style="background-color: #eee; cursor: pointer;" @click="showDrawer">任务组</span>
+                  <span class="el-tag el-tag--plain" style="background-color: #eee; cursor: pointer" @click="addTask()">添加任务</span>
+                  <span class="el-tag el-tag--plain" style="background-color: #eee; margin: 0px 5px; cursor: pointer;" @click="showDrawer">任务组</span>
+                  <span class="el-tag el-tag--plain" style="background-color: #eee; cursor: pointer;" @click="updatePmsTaskIds()">任务编号</span>
+                  <span class="el-tag el-tag--plain" style="background-color: #eee; margin: 0px 5px; cursor: pointer" @click="showProcChart()">流程图</span>
                 </el-row>
               </div>
             </template>
@@ -264,7 +220,7 @@
           <el-table-column align="center" label="操作">
             <template slot="header">
               <div style="background-color: #ddd; color: #909399;">
-                <span style="cursor: pointer;" @click="addTaskResPlan()">添加资源方案</span>
+                <span class="el-tag el-tag--plain" @click="addTaskResPlan()" style="background-color: #eee; cursor: pointer; margin-right: 6px">添加资源方案</span>
               </div>
             </template>
             <template slot-scope="scope">
@@ -743,11 +699,11 @@
     <!--    抽屉部分-->
     <el-drawer
       title="任务组"
-      :visible.sync="drawer"
+      :visible.sync="drawerTaskGroup"
       :with-header="false"
       direction="ttb"
       size="50%">
-      <el-container class="drawer-container">
+      <el-container class="drawer-taskGroup-container">
         <el-aside width="25%">
           <div class="el-table-up-head" style="width: 100%;">
             <span>{{ this.currProc.procName }} 任务组</span>
@@ -805,7 +761,7 @@
             border>
             <el-table-column prop="pmsTask.taskId" label="编号" align="center" sortable width="90"></el-table-column>
             <el-table-column prop="pmsTask.taskName" label="任务名称" align="center" width="220"></el-table-column>
-            <el-table-column prop="pmsTask.taskPlanDur" label="计划工期" align="center"></el-table-column>
+            <el-table-column prop="pmsTask.taskPlanDur" label="计划工期/天" align="center"></el-table-column>
             <el-table-column prop="taskNormalPreTasks" :formatter="taskNormalPreTasksFormat" label="紧前任务编号" align="center"></el-table-column>
             <el-table-column prop="pmsGroup.groupName" label="任务组" align="center" width="220"></el-table-column>
             <el-table-column prop="pmsTask.taskType" :formatter="taskTypeFormat" label="任务类型" align="center"></el-table-column>
@@ -854,6 +810,16 @@
         </el-aside>
       </el-container>
     </el-drawer>
+    <el-drawer
+      title="流程图"
+      :visible.sync="drawerProcChart"
+      :with-header="false"
+      direction="ttb"
+      size="50%">
+      <el-container class="drawer-procChart-container">
+        <div id="procChartContainer" style="height: 600px; width: 100%"></div>
+      </el-container>
+    </el-drawer>
   </el-container>
 </template>
 
@@ -862,7 +828,8 @@ import Sortable from 'sortablejs'
 export default {
   data() {
     return {
-      drawer: false,
+      drawerTaskGroup: false,
+      drawerProcChart: false,
       activeTagName: 'human',
       groupList: [],
       groupTaskList: [],
@@ -940,7 +907,7 @@ export default {
         label: '节点'
       }, {
         value: 5,
-        label: '黑盒'
+        label: '黑箱'
       }],
       taskPriorityOptions: [{
         value: 1,
@@ -966,7 +933,12 @@ export default {
       resReqHumList: [],
       resReqEquipList: [],
       resReqPlaceList: [],
-      resReqKnowlList: []
+      resReqKnowlList: [],
+      procChartTaskList: [],
+      procChartData: {
+        procChartData: [],
+        procChartLinks: []
+      }
     }
   },
   created() {
@@ -1045,7 +1017,7 @@ export default {
         case 2: return '质量'
         case 3: return '安全'
         case 4: return '节点'
-        case 5: return '黑盒'
+        case 5: return '黑箱'
       }
     },
     // 格式化PmsTask任务类型
@@ -1056,7 +1028,7 @@ export default {
         case 2: return '质量'
         case 3: return '安全'
         case 4: return '节点'
-        case 5: return '黑盒'
+        case 5: return '黑箱'
       }
     },
     // 格式化任务执行模式
@@ -1080,7 +1052,7 @@ export default {
         case 1: return '或输出'
       }
     },
-    // 格式化任务优先级
+    // 格式化任务重要性
     taskPriorityFormat(row) {
       switch (row.pmsTask.taskPriority) {
         case 1: return '普通'
@@ -1098,16 +1070,6 @@ export default {
       }
       return preTaskIds.join(',')
     },
-    // // 格式化真紧前任务列
-    // taskRealPreTasksFormat(row) {
-    //   const preTasks = row.taskRealPreTasks
-    //   const preTaskIds = []
-    //   for (let i = 0, len = preTasks.length; i < len; i++) {
-    //     preTaskIds.push(preTasks[i].taskId)
-    //   }
-    //   return preTaskIds.join(',')
-    // },
-    // 格式化场地类型列
     placeTypeFormat(row) {
       switch (row.placeType) {
         case 0: return '室内仓库'
@@ -1281,6 +1243,48 @@ export default {
         return task
       })
       this.taskList = res
+    },
+    // 根据流程UID请求流程图所需任务数据
+    async getProcChartTaskListByProcUid() {
+      const { data: res } = await this.$http.get('/task/getProcChartTaskListByProcUid/' + this.currProc.procUid)
+      this.procChartTaskList = res
+      const procChartData = []
+      const procChartLinks = []
+      this.zoneTime = 9007199254740992
+      for (let i = 0, ilen = this.procChartTaskList.length; i < ilen; i++) {
+        const tasks = this.procChartTaskList[i]
+        const jlen = tasks.length
+        const interval = 1000 / (jlen + 1)
+        for (let j = 0; j < jlen; j++) {
+          const task = {}
+          task.name = tasks[j].pmsTask.taskName
+          task.y = interval * (j + 1)
+          task.x = 300 * (i + 1)
+          task.itemStyle = {
+            color: '#C23531'
+          }
+          if (tasks[j].pmsGroup != null) {
+            task.itemStyle = {
+              color: '#F96'
+            }
+          }
+          if (this.zoneTime > task.start) {
+            this.zoneTime = task.start
+          }
+          procChartData.push(task)
+          const sucTasks = tasks[j].taskRealSucTasks
+          const klen = sucTasks.length
+          for (let k = 0; k < klen; k++) {
+            const link = {}
+            link.source = task.name
+            link.target = sucTasks[k].taskName
+            procChartLinks.push(link)
+          }
+        }
+      }
+      this.procChartData.procChartData = procChartData
+      this.procChartData.procChartLinks = procChartLinks
+      this.procChart()
     },
     // 请求资源计划表格数据
     async getTaskResPlanList() {
@@ -1501,11 +1505,17 @@ export default {
     },
     // 点击任务组按钮
     showDrawer() {
-      this.drawer = true
-      this.getGroupList()
-      if (this.groupList.length > 0) {
-        this.currGroup = this.groupList[0]
-      }
+      this.drawerTaskGroup = true
+      this.getGroupList().then(() => {
+        if (this.groupList.length > 0) {
+          this.currGroup = this.groupList[0]
+          this.getGroupTaskList()
+        }
+      })
+    },
+    showProcChart() {
+      this.getProcChartTaskListByProcUid()
+      this.drawerProcChart = true
     },
     // 编制任务组
     devGroup(row) {
@@ -1818,6 +1828,50 @@ export default {
         this.getGroupList()
         this.$message.success('删除成功！')
       })
+    },
+    // 流程图
+    procChart() {
+      const myChart = this.$echarts.init(document.getElementById('procChartContainer'))
+      const data = this.procChartData.procChartData
+      const links = this.procChartData.procChartLinks
+      const option = {
+        title: {
+          text: '流程图',
+          subtext: '橙色：任务组'
+        },
+        tooltip: {},
+        animationDurationUpdate: 1500,
+        animationEasingUpdate: 'quinticInOut',
+        series: [
+          {
+            type: 'graph',
+            layout: 'none',
+            symbolSize: 30,
+            roam: true,
+            label: {
+              show: true,
+              textStyle: {
+                // color: 'black'
+              }
+            },
+            edgeSymbol: ['circle', 'arrow'],
+            edgeSymbolSize: [4, 10],
+            edgeLabel: {
+              fontSize: 20
+            },
+            symbol: 'rectangle',
+            data: data,
+            // links: [],
+            links: links,
+            lineStyle: {
+              opacity: 0.9,
+              width: 2,
+              curveness: 0
+            }
+          }
+        ]
+      }
+      myChart.setOption(option)
     }
   }
 }

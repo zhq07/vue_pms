@@ -27,8 +27,8 @@
         <el-table-column prop="projState" label="状态" :formatter="stateFormat" align="center" width="100"></el-table-column>
         <el-table-column label="操作" align="center" width="200">
           <template slot="header">
-            <div style="background-color: #ddd; color: #909399; cursor: pointer;" @click="handleInsertRoot()">
-              添加项目
+            <div style="background-color: #ddd; color: #909399;">
+              <span class="el-tag el-tag--plain" @click="handleInsertRoot()" style="background-color: #eee; cursor: pointer; margin-right: 6px">添加项目</span>
             </div>
           </template>
           <template slot-scope="scope">

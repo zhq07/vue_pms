@@ -13,7 +13,7 @@
           <el-tab-pane label="任务列表" name="resultTaskList">
             <el-table
               :data="taskList"
-              height="480px"
+              height="500px"
               row-key="taskUid"
               :header-cell-style="{'text-align':'center', background:'#ddd'}"
               highlight-current-row
@@ -229,7 +229,6 @@ export default {
       const procChartData = []
       const procChartLinks = []
       this.zoneTime = 9007199254740992
-      // console.log('this.procChartTaskList', this.procChartTaskList)
       for (let i = 0, ilen = this.procChartTaskList.length; i < ilen; i++) {
         const tasks = this.procChartTaskList[i]
         const jlen = tasks.length

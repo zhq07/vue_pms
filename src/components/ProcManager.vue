@@ -27,8 +27,8 @@
           <el-table-column prop="procState" label="状态" :formatter="procStateFormat" align="center" width="120"></el-table-column>
           <el-table-column label="操作" align="center" width="220">
             <template slot="header">
-              <div style="background-color: #ddd; color: #909399; cursor: pointer;" @click="handleInsertRoot()">
-                添加流程
+              <div style="background-color: #ddd; color: #909399;">
+                <span class="el-tag el-tag--plain" @click="handleInsertRoot()" style="background-color: #eee; cursor: pointer; margin-right: 6px">添加流程</span>
               </div>
             </template>
             <template slot-scope="scope">
@@ -159,25 +159,31 @@
       <!--      下半部分-->
       <el-main class="down-main">
         <div class="el-table-up-head" style="width: 100%;"><span>{{ this.currProc.procName }}</span></div>
-        <el-table
-          :data="taskList"
-          height="93%"
-          row-key="taskUid"
-          :header-cell-style="{'text-align':'center', background:'#ddd'}"
-          highlight-current-row
-          border>
-          <el-table-column prop="pmsTask.taskId" label="编号" align="center" sortable width="90"></el-table-column>
-          <el-table-column prop="pmsTask.taskName" label="任务名称" align="center" width="220"></el-table-column>
-          <el-table-column prop="pmsTask.taskPlanStartDateTime" :formatter="datetimeFormat" label="计划开始" align="center"></el-table-column>
-          <el-table-column prop="pmsTask.taskPlanFinishDateTime" :formatter="datetimeFormat" label="计划结束" align="center"></el-table-column>
-          <el-table-column prop="pmsTask.taskPlanDur" label="计划工期" align="center"></el-table-column>
-          <el-table-column prop="taskNormalPreTasks" :formatter="taskNormalPreTasksFormat" label="紧前任务" align="center"></el-table-column>
-<!--          <el-table-column prop="taskRealPreTasks" :formatter="taskRealPreTasksFormat" label="真紧前任务" align="center"></el-table-column>-->
-          <el-table-column prop="pmsGroup.groupName" label="任务组" align="center"></el-table-column>
-          <el-table-column prop="pmsTask.taskInType" :formatter="taskInTypeFormat" label="输入类型" align="center"></el-table-column>
-          <el-table-column prop="pmsTask.taskOutType" :formatter="taskOutTypeFormat" label="输出类型" align="center"></el-table-column>
-          <el-table-column prop="pmsTask.taskType" :formatter="taskTypeFormat" label="任务类型" align="center"></el-table-column>
-        </el-table>
+        <el-tabs v-model="activeTagName" type="card">
+          <el-tab-pane label="任务列表" name="curProcTaskList">
+            <el-table
+              :data="taskList"
+              height="546px"
+              row-key="taskUid"
+              :header-cell-style="{'text-align':'center', background:'#ddd'}"
+              highlight-current-row
+              border>
+              <el-table-column prop="pmsTask.taskId" label="编号" align="center" sortable width="90"></el-table-column>
+              <el-table-column prop="pmsTask.taskName" label="任务名称" align="center" width="220"></el-table-column>
+              <el-table-column prop="pmsTask.taskPlanStartDateTime" :formatter="datetimeFormat" label="计划开始" align="center"></el-table-column>
+              <el-table-column prop="pmsTask.taskPlanFinishDateTime" :formatter="datetimeFormat" label="计划结束" align="center"></el-table-column>
+              <el-table-column prop="pmsTask.taskPlanDur" label="计划工期/天" align="center"></el-table-column>
+              <el-table-column prop="taskNormalPreTasks" :formatter="taskNormalPreTasksFormat" label="紧前任务" align="center"></el-table-column>
+              <el-table-column prop="pmsGroup.groupName" label="任务组" align="center"></el-table-column>
+              <el-table-column prop="pmsTask.taskType" :formatter="taskTypeFormat" label="任务类型" align="center"></el-table-column>
+              <el-table-column prop="pmsTask.taskType" :formatter="taskWorkModelFormat" label="执行模式" align="center"></el-table-column>
+              <el-table-column prop="pmsTask.taskPriority" :formatter="taskPriorityFormat" label="重要性" align="center"></el-table-column>
+            </el-table>
+          </el-tab-pane>
+          <el-tab-pane label="流程图" name="curProcChart">
+            <div id="procChartContainer" style="height: 560px; width: 1550px"></div>
+          </el-tab-pane>
+        </el-tabs>
       </el-main>
     </el-container>
   </el-container>
@@ -187,6 +193,7 @@
 export default {
   data() {
     return {
+      activeTagName: 'curProcTaskList',
       ProjTreeProps: {
         children: 'children',
         label: 'projName'
@@ -231,7 +238,12 @@ export default {
       projListTree: [],
       projList: [],
       procList: [],
-      taskList: []
+      taskList: [],
+      procChartTaskList: [],
+      procChartData: {
+        procChartData: [],
+        procChartLinks: []
+      }
     }
   },
   created() {
@@ -241,6 +253,7 @@ export default {
       if (this.procList.length > 0) {
         this.currProc = this.procList[0]
         this.getTaskListByProcUid()
+        this.getProcChartTaskListByProcUid()
       }
     })
   },
@@ -280,7 +293,7 @@ export default {
         case 2: return '质量'
         case 3: return '安全'
         case 4: return '节点'
-        case 5: return '黑盒'
+        case 5: return '黑箱'
       }
     },
     // 格式化任务输入类型列
@@ -297,6 +310,22 @@ export default {
         case 1: return '或输出'
       }
     },
+    // 格式化任务执行模式
+    taskWorkModelFormat(row) {
+      switch (row.pmsTask.taskWorkModel) {
+        case 0: return '普通'
+        case 1: return '连续'
+      }
+    },
+    // 格式化任务重要性
+    taskPriorityFormat(row) {
+      switch (row.pmsTask.taskPriority) {
+        case 1: return '普通'
+        case 2: return '重要'
+        case 4: return '关键'
+        default: return '未知'
+      }
+    },
     // 格式化普通紧前任务列
     taskNormalPreTasksFormat(row) {
       const preTasks = row.taskNormalPreTasks
@@ -306,15 +335,6 @@ export default {
       }
       return preTaskIds.join(',')
     },
-    // // 格式化真紧前任务列
-    // taskRealPreTasksFormat(row) {
-    //   const preTasks = row.taskRealPreTasks
-    //   const preTaskIds = []
-    //   for (let i = 0, len = preTasks.length; i < len; i++) {
-    //     preTaskIds.push(preTasks[i].taskId)
-    //   }
-    //   return preTaskIds.join(',')
-    // },
     // 判断str是否为空或空字符串
     strIsEmpty(str) {
       if (str === undefined || str === null || str === '') {
@@ -385,6 +405,49 @@ export default {
       const { data: res } = await this.$http.get('/task/getTaskListByProcUid/' + this.currProc.procUid)
       this.taskList = res
     },
+    // 根据流程UID请求流程图所需任务数据
+    async getProcChartTaskListByProcUid() {
+      const { data: res } = await this.$http.get('/task/getProcChartTaskListByProcUid/' + this.currProc.procUid)
+      this.procChartTaskList = res
+      const procChartData = []
+      const procChartLinks = []
+      this.zoneTime = 9007199254740992
+      for (let i = 0, ilen = this.procChartTaskList.length; i < ilen; i++) {
+        const tasks = this.procChartTaskList[i]
+        const jlen = tasks.length
+        const interval = 1000 / (jlen + 1)
+        for (let j = 0; j < jlen; j++) {
+          const task = {}
+          task.name = tasks[j].pmsTask.taskName
+          task.y = interval * (j + 1)
+          task.x = 300 * (i + 1)
+          task.itemStyle = {
+            color: '#C23531'
+          }
+          if (tasks[j].pmsGroup != null) {
+            task.itemStyle = {
+              color: '#F96'
+            }
+          }
+          // console.log('task.start', task.start)
+          if (this.zoneTime > task.start) {
+            this.zoneTime = task.start
+          }
+          procChartData.push(task)
+          const sucTasks = tasks[j].taskRealSucTasks
+          const klen = sucTasks.length
+          for (let k = 0; k < klen; k++) {
+            const link = {}
+            link.source = task.name
+            link.target = sucTasks[k].taskName
+            procChartLinks.push(link)
+          }
+        }
+      }
+      this.procChartData.procChartData = procChartData
+      this.procChartData.procChartLinks = procChartLinks
+      this.procChart()
+    },
     // 请求表单中对应项目的备选数据
     async getProjList() {
       const { data: res } = await this.$http.get('/proj/getAll')
@@ -404,6 +467,7 @@ export default {
         if (this.procList.length > 0) {
           this.currProc = this.procList[0]
           this.getTaskListByProcUid()
+          this.getProcChartTaskListByProcUid()
         } else {
           this.taskList = []
           this.currProc = {}
@@ -458,6 +522,7 @@ export default {
     handleView(index, row) {
       this.currProc = row
       this.getTaskListByProcUid()
+      this.getProcChartTaskListByProcUid()
     },
     // 编制按钮函数
     handleDev(index, row) {
@@ -468,7 +533,8 @@ export default {
       const { data: res } = await this.$http.post('/proc/publishProc', row)
       if (res === 'success') {
         this.$message.success('发布成功!')
-        await this.$router.push({ path: '/projManager' })
+        // await this.$router.push({ path: '/projManager' })
+        await this.$router.go(0)
       } else {
         this.$message.error('发布失败!')
       }
@@ -503,6 +569,50 @@ export default {
       this.form.procName = ''
       this.form.procProjUid = ''
       this.form.procProjName = ''
+    },
+    // 流程图
+    procChart() {
+      const myChart = this.$echarts.init(document.getElementById('procChartContainer'))
+      const data = this.procChartData.procChartData
+      const links = this.procChartData.procChartLinks
+      const option = {
+        title: {
+          text: '流程图',
+          subtext: '橙色：任务组'
+        },
+        tooltip: {},
+        animationDurationUpdate: 1500,
+        animationEasingUpdate: 'quinticInOut',
+        series: [
+          {
+            type: 'graph',
+            layout: 'none',
+            symbolSize: 30,
+            roam: true,
+            label: {
+              show: true,
+              textStyle: {
+                // color: 'black'
+              }
+            },
+            edgeSymbol: ['circle', 'arrow'],
+            edgeSymbolSize: [4, 10],
+            edgeLabel: {
+              fontSize: 20
+            },
+            symbol: 'rectangle',
+            data: data,
+            // links: [],
+            links: links,
+            lineStyle: {
+              opacity: 0.9,
+              width: 2,
+              curveness: 0
+            }
+          }
+        ]
+      }
+      myChart.setOption(option)
     }
   }
 }
