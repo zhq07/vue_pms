@@ -3,6 +3,7 @@
     <!--    上半部分-->
     <el-container class="up-container">
       <div id="procChartContainer" style="height: 100%;width: 1780px"></div>
+      <el-button type="primary" plain @click="savePlan">保存计划</el-button>
     </el-container>
     <!--    分割上下-->
     <div style="width: 100%; height: 10px; background-color: #D6E8F7"></div>
@@ -168,6 +169,23 @@ export default {
         return true
       }
     },
+    savePlan() {
+      this.$confirm('确认保存当前计划方案', '保存', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'info'
+      }).then(() => {
+        this.$message({
+          type: 'success',
+          message: '保存成功!'
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消保存'
+        })
+      })
+    },
     handleResult() {
       // 获取页面参数，刷新任务列表数据
       this.optResult = JSON.parse(this.$route.query.optResult)
@@ -317,8 +335,8 @@ export default {
       setTimeout(() => {
         for (let i = 0, len = updateData.length; i < len; i++) {
           const task = updateData[i]
-          const start = (task.start - this.zoneTime) / (Day * 8)
-          const finish = (task.finish - this.zoneTime) / (Day * 8)
+          const start = (task.start - this.zoneTime) / (Day * 6)
+          const finish = (task.finish - this.zoneTime) / (Day * 6)
           setTimeout(() => {
             task.itemStyle.color = '#F96'
             myChart.setOption(option)
@@ -873,5 +891,15 @@ export default {
   }
   .down-container {
     height: 60%;
+  }
+  #procChartContainer {
+    position: relative;
+  }
+  .el-button {
+    position: absolute;
+    margin-top: 2px;
+    padding: 5px;
+    left: 460px;
+    font-size: 16px;
   }
 </style>

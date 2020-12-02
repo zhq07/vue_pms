@@ -40,25 +40,11 @@
             <i class="el-icon-s-marketing"></i>
             <span slot="title">项目优化</span>
           </el-menu-item>
+          <el-menu-item index="/procSim">
+            <i class="el-icon-s-data"></i>
+            <span slot="title">流程仿真</span>
+          </el-menu-item>
           <el-submenu index="4">
-            <template slot="title">
-              <i class="el-icon-s-data"></i>
-              <span>流程仿真</span>
-            </template>
-            <el-menu-item index="/procSim">
-              <i class="el-icon-collection-tag"></i>
-              <span slot="title">流程仿真</span>
-            </el-menu-item>
-<!--            <el-menu-item index="/procSimMode1">-->
-<!--              <i class="el-icon-collection-tag"></i>-->
-<!--              <span slot="title">已固定流程</span>-->
-<!--            </el-menu-item>-->
-<!--            <el-menu-item index="/procSimMode2">-->
-<!--              <i class="el-icon-collection-tag"></i>-->
-<!--              <span slot="title">自定义流程</span>-->
-<!--            </el-menu-item>-->
-          </el-submenu>
-          <el-submenu index="5">
             <template slot="title">
               <i class="el-icon-setting"></i>
               <span>资源管理</span>

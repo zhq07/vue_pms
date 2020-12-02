@@ -15,7 +15,7 @@
         <el-table-column prop="projName" label="项目名称" width="200"></el-table-column>
         <el-table-column prop="projOrgName" label="所属组织" width="200"></el-table-column>
   <!--      <el-table-column prop="projManager" label="负责人" align="center" width="100"></el-table-column>-->
-        <el-table-column prop="projPriority" label="优先级" :formatter="priorityFormat" align="center" width="100"></el-table-column>
+        <el-table-column prop="projPriority" label="重要性" :formatter="priorityFormat" align="center" width="100"></el-table-column>
         <el-table-column prop="projPlanStartDateTime" :formatter="dateFormat" label="计划开始" align="center" width="150"></el-table-column>
         <el-table-column prop="projPlanFinishDateTime" :formatter="dateFormat" label="计划结束" align="center" width="150"></el-table-column>
         <el-table-column prop="projPlanDur" label="计划工期" align="center" width="100"></el-table-column>
@@ -164,7 +164,7 @@
             </el-col>
             <el-col :span="12">
               <div class="grid-content bg-purple-light">
-                <el-form-item label="优先级" prop="projPriority">
+                <el-form-item label="重要性" prop="projPriority">
                   <el-select v-model="form.projPriority" clearable placeholder="请选择" :validate-event="false">
                     <el-option
                       v-for="priority in projPriorityOptions"
@@ -387,7 +387,7 @@ export default {
       const moment = require('moment')
       return moment(datetime).format('YYYY-MM-DD HH:mm')
     },
-    // 格式化优先级列
+    // 格式化重要性列
     priorityFormat(row, column, cellValue) {
       switch (cellValue) {
         case 1: return '普通'

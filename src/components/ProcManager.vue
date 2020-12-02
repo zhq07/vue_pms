@@ -426,10 +426,14 @@ export default {
           }
           if (tasks[j].pmsGroup != null) {
             task.itemStyle = {
-              color: '#F96'
+              color: 'cadetblue'
             }
           }
-          // console.log('task.start', task.start)
+          if (tasks[j].pmsTask.taskType === 5) {
+            task.itemStyle = {
+              color: '#666'
+            }
+          }
           if (this.zoneTime > task.start) {
             this.zoneTime = task.start
           }
@@ -578,7 +582,7 @@ export default {
       const option = {
         title: {
           text: '流程图',
-          subtext: '橙色：任务组'
+          subtext: '蓝色：任务组；灰色：黑箱任务'
         },
         tooltip: {},
         animationDurationUpdate: 1500,
